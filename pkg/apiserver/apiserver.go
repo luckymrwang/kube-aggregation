@@ -134,7 +134,7 @@ func (s *APIServer) PrepareRun(stopCh <-chan struct{}) error {
 	})
 
 	s.installKubeSphereAPIs(stopCh)
-	s.installCRDAPIs()
+	//s.installCRDAPIs()
 	s.installMetricsAPI()
 	s.container.Filter(monitorRequest)
 
