@@ -21,8 +21,6 @@ import (
 	"flag"
 	"fmt"
 
-	"kube-aggregation/pkg/utils/clusterclient"
-
 	"kube-aggregation/pkg/apiserver/authentication/token"
 
 	"k8s.io/client-go/kubernetes/scheme"
@@ -136,11 +134,6 @@ func (s *ServerRunOptions) NewAPIServer(stopCh <-chan struct{}) (*apiserver.APIS
 		klog.Warning("ks-apiserver starts without redis provided, it will use in memory cache. " +
 			"This may cause inconsistencies when running ks-apiserver with multiple replicas.")
 		apiServer.CacheClient = cache.NewSimpleCache()
-	}
-
-	if s.Config.MultiClusterOptions.Enable {
-		cc := clusterclient.NewClusterClient(informerFactory.KubeSphereSharedInformerFactory().Cluster().V1alpha1().Clusters())
-		apiServer.ClusterClient = cc
 	}
 
 	server := &http.Server{

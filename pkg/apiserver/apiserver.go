@@ -53,30 +53,18 @@ import (
 	"kube-aggregation/pkg/apiserver/authorization"
 	"kube-aggregation/pkg/apiserver/authorization/authorizer"
 	"kube-aggregation/pkg/apiserver/authorization/authorizerfactory"
-	"kube-aggregation/pkg/apiserver/authorization/path"
-	"kube-aggregation/pkg/apiserver/authorization/rbac"
-	unionauthorizer "kube-aggregation/pkg/apiserver/authorization/union"
 	apiserverconfig "kube-aggregation/pkg/apiserver/config"
 	"kube-aggregation/pkg/apiserver/dispatch"
 	"kube-aggregation/pkg/apiserver/filters"
 	"kube-aggregation/pkg/apiserver/request"
 	"kube-aggregation/pkg/informers"
-	clusterkapisv1alpha1 "kube-aggregation/pkg/kapis/cluster/v1alpha1"
 	configv1alpha2 "kube-aggregation/pkg/kapis/config/v1alpha2"
 	"kube-aggregation/pkg/kapis/crd"
-	iamapi "kube-aggregation/pkg/kapis/iam/v1alpha2"
 	meteringv1alpha1 "kube-aggregation/pkg/kapis/metering/v1alpha1"
-	monitoringv1alpha3 "kube-aggregation/pkg/kapis/monitoring/v1alpha3"
-	"kube-aggregation/pkg/kapis/oauth"
 	resourcesv1alpha2 "kube-aggregation/pkg/kapis/resources/v1alpha2"
 	resourcev1alpha3 "kube-aggregation/pkg/kapis/resources/v1alpha3"
 	"kube-aggregation/pkg/kapis/version"
 	"kube-aggregation/pkg/models/auth"
-	"kube-aggregation/pkg/models/iam/am"
-	"kube-aggregation/pkg/models/iam/group"
-	"kube-aggregation/pkg/models/iam/im"
-	"kube-aggregation/pkg/models/resources/v1alpha3/loginrecord"
-	"kube-aggregation/pkg/models/resources/v1alpha3/user"
 	"kube-aggregation/pkg/simple/client/cache"
 	"kube-aggregation/pkg/simple/client/k8s"
 	"kube-aggregation/pkg/simple/client/monitoring"
@@ -165,44 +153,15 @@ func (s *APIServer) installMetricsAPI() {
 	metrics.Defaults.Install(s.container)
 }
 
-// Install all kubesphere api groups
 // Installation happens before all informers start to cache objects, so
 //   any attempt to list objects using listers will get empty results.
 func (s *APIServer) installKubeSphereAPIs(stopCh <-chan struct{}) {
-	imOperator := im.NewOperator(s.KubernetesClient.KubeSphere(),
-		user.New(s.InformerFactory.KubeSphereSharedInformerFactory(),
-			s.InformerFactory.KubernetesSharedInformerFactory()),
-		loginrecord.New(s.InformerFactory.KubeSphereSharedInformerFactory()),
-		s.Config.AuthenticationOptions)
-	amOperator := am.NewOperator(s.KubernetesClient.KubeSphere(),
-		s.KubernetesClient.Kubernetes(),
-		s.InformerFactory)
-	rbacAuthorizer := rbac.NewRBACAuthorizer(amOperator)
-
 	urlruntime.Must(configv1alpha2.AddToContainer(s.container, s.Config))
 	urlruntime.Must(resourcev1alpha3.AddToContainer(s.container, s.InformerFactory, s.RuntimeCache))
-	urlruntime.Must(monitoringv1alpha3.AddToContainer(s.container, s.KubernetesClient.Kubernetes(), s.MonitoringClient, s.MetricsClient, s.InformerFactory, s.RuntimeClient))
 	urlruntime.Must(meteringv1alpha1.AddToContainer(s.container, s.KubernetesClient.Kubernetes(), s.MonitoringClient, s.InformerFactory, s.RuntimeCache, s.Config.MeteringOptions, s.RuntimeClient))
 	urlruntime.Must(resourcesv1alpha2.AddToContainer(s.container, s.KubernetesClient.Kubernetes(), s.InformerFactory,
 		s.KubernetesClient.Master()))
-	urlruntime.Must(clusterkapisv1alpha1.AddToContainer(s.container,
-		s.KubernetesClient.KubeSphere(),
-		s.InformerFactory.KubernetesSharedInformerFactory(),
-		s.InformerFactory.KubeSphereSharedInformerFactory(),
-		s.Config.MultiClusterOptions.ProxyPublishService,
-		s.Config.MultiClusterOptions.ProxyPublishAddress,
-		s.Config.MultiClusterOptions.AgentImage))
-	urlruntime.Must(iamapi.AddToContainer(s.container, imOperator, amOperator,
-		group.New(s.InformerFactory, s.KubernetesClient.KubeSphere(), s.KubernetesClient.Kubernetes()),
-		rbacAuthorizer))
 
-	userLister := s.InformerFactory.KubeSphereSharedInformerFactory().Iam().V1alpha2().Users().Lister()
-	urlruntime.Must(oauth.AddToContainer(s.container, imOperator,
-		auth.NewTokenOperator(s.CacheClient, s.Issuer, s.Config.AuthenticationOptions),
-		auth.NewPasswordAuthenticator(s.KubernetesClient.KubeSphere(), userLister, s.Config.AuthenticationOptions),
-		auth.NewOAuthAuthenticator(s.KubernetesClient.KubeSphere(), userLister, s.Config.AuthenticationOptions),
-		auth.NewLoginRecorder(s.KubernetesClient.KubeSphere(), userLister),
-		s.Config.AuthenticationOptions))
 	urlruntime.Must(version.AddToContainer(s.container, s.KubernetesClient.Kubernetes().Discovery()))
 }
 
@@ -263,12 +222,6 @@ func (s *APIServer) buildHandlerChain(stopCh <-chan struct{}) {
 	case authorization.AlwaysDeny:
 		authorizers = authorizerfactory.NewAlwaysDenyAuthorizer()
 	default:
-		fallthrough
-	case authorization.RBAC:
-		excludedPaths := []string{"/oauth/*", "/kapis/config.kubesphere.io/*", "/kapis/version", "/kapis/metrics"}
-		pathAuthorizer, _ := path.NewAuthorizer(excludedPaths)
-		amOperator := am.NewReadOnlyOperator(s.InformerFactory)
-		authorizers = unionauthorizer.New(pathAuthorizer, rbac.NewRBACAuthorizer(amOperator))
 	}
 
 	handler = filters.WithAuthorization(handler, authorizers)
@@ -402,8 +355,6 @@ func (s *APIServer) waitForResourceSync(ctx context.Context) error {
 			"globalrolebindings",
 			"groups",
 			"groupbindings",
-			"workspaceroles",
-			"workspacerolebindings",
 			"loginrecords",
 		},
 		{Group: "cluster.kubesphere.io", Version: "v1alpha1"}: {

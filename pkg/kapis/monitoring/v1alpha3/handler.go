@@ -65,11 +65,6 @@ func NewHandler(k kubernetes.Interface, monitoringClient monitoring.Interface, m
 	}
 }
 
-func (h handler) handleKubeSphereMetricsQuery(req *restful.Request, resp *restful.Response) {
-	res := h.mo.GetKubeSphereStats()
-	resp.WriteAsJson(res)
-}
-
 func (h handler) handleClusterMetricsQuery(req *restful.Request, resp *restful.Response) {
 	params := parseRequestParams(req)
 	opt, err := h.makeQueryOptions(params, monitoring.LevelCluster)
@@ -88,22 +83,6 @@ func (h handler) handleNodeMetricsQuery(req *restful.Request, resp *restful.Resp
 		return
 	}
 	h.handleNamedMetricsQuery(resp, opt)
-}
-
-func (h handler) handleWorkspaceMetricsQuery(req *restful.Request, resp *restful.Response) {
-	params := parseRequestParams(req)
-	opt, err := h.makeQueryOptions(params, monitoring.LevelWorkspace)
-	if err != nil {
-		api.HandleBadRequest(resp, nil, err)
-		return
-	}
-
-	if req.QueryParameter("type") == "statistics" {
-		res := h.mo.GetWorkspaceStats(params.workspaceName)
-		resp.WriteAsJson(res)
-	} else {
-		h.handleNamedMetricsQuery(resp, opt)
-	}
 }
 
 func (h handler) handleNamespaceMetricsQuery(req *restful.Request, resp *restful.Response) {

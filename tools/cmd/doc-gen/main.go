@@ -31,32 +31,15 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
 	"github.com/pkg/errors"
-	promfake "github.com/prometheus-operator/prometheus-operator/pkg/client/versioned/fake"
 	urlruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/klog"
 
 	"kube-aggregation/pkg/apiserver/runtime"
-	"kube-aggregation/pkg/client/clientset/versioned/fake"
 	"kube-aggregation/pkg/constants"
 	"kube-aggregation/pkg/informers"
-	alertingv2alpha1 "kube-aggregation/pkg/kapis/alerting/v2alpha1"
-	clusterkapisv1alpha1 "kube-aggregation/pkg/kapis/cluster/v1alpha1"
-	kapisdevops "kube-aggregation/pkg/kapis/devops"
-	iamv1alpha2 "kube-aggregation/pkg/kapis/iam/v1alpha2"
 	monitoringv1alpha3 "kube-aggregation/pkg/kapis/monitoring/v1alpha3"
-	networkv1alpha2 "kube-aggregation/pkg/kapis/network/v1alpha2"
-	"kube-aggregation/pkg/kapis/oauth"
-	openpitrixv1 "kube-aggregation/pkg/kapis/openpitrix/v1"
-	openpitrixv2 "kube-aggregation/pkg/kapis/openpitrix/v2alpha1"
-	operationsv1alpha2 "kube-aggregation/pkg/kapis/operations/v1alpha2"
 	resourcesv1alpha2 "kube-aggregation/pkg/kapis/resources/v1alpha2"
 	resourcesv1alpha3 "kube-aggregation/pkg/kapis/resources/v1alpha3"
-	metricsv1alpha2 "kube-aggregation/pkg/kapis/servicemesh/metrics/v1alpha2"
-	tenantv1alpha2 "kube-aggregation/pkg/kapis/tenant/v1alpha2"
-	tenantv1alpha3 "kube-aggregation/pkg/kapis/tenant/v1alpha3"
-	terminalv1alpha2 "kube-aggregation/pkg/kapis/terminal/v1alpha2"
-	"kube-aggregation/pkg/models/iam/group"
-	"kube-aggregation/pkg/simple/client/alerting"
 	"kube-aggregation/pkg/simple/client/k8s"
 	"kube-aggregation/pkg/version"
 )
@@ -110,31 +93,13 @@ func validateSpec(apiSpec []byte) error {
 }
 
 func generateSwaggerJson() []byte {
-
 	container := runtime.Container
 	clientsets := k8s.NewNullClient()
 
 	informerFactory := informers.NewNullInformerFactory()
-
-	urlruntime.Must(oauth.AddToContainer(container, nil, nil, nil, nil, nil, nil))
-	urlruntime.Must(clusterkapisv1alpha1.AddToContainer(container, clientsets.KubeSphere(), informerFactory.KubernetesSharedInformerFactory(),
-		informerFactory.KubeSphereSharedInformerFactory(), "", "", ""))
-	urlruntime.Must(kapisdevops.AddToContainer(container, ""))
-	urlruntime.Must(iamv1alpha2.AddToContainer(container, nil, nil, group.New(informerFactory, clientsets.KubeSphere(), clientsets.Kubernetes()), nil))
-	urlruntime.Must(monitoringv1alpha3.AddToContainer(container, clientsets.Kubernetes(), nil, nil, informerFactory, nil, nil))
-	urlruntime.Must(openpitrixv1.AddToContainer(container, informerFactory, fake.NewSimpleClientset(), nil, nil))
-	urlruntime.Must(openpitrixv2.AddToContainer(container, informerFactory, fake.NewSimpleClientset(), nil))
-	urlruntime.Must(operationsv1alpha2.AddToContainer(container, clientsets.Kubernetes()))
+	urlruntime.Must(monitoringv1alpha3.AddToContainer(container, clientsets.Kubernetes(), nil, nil, informerFactory, nil))
 	urlruntime.Must(resourcesv1alpha2.AddToContainer(container, clientsets.Kubernetes(), informerFactory, ""))
 	urlruntime.Must(resourcesv1alpha3.AddToContainer(container, informerFactory, nil))
-	urlruntime.Must(tenantv1alpha2.AddToContainer(container, informerFactory, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil))
-	urlruntime.Must(tenantv1alpha3.AddToContainer(container, informerFactory, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil))
-	urlruntime.Must(terminalv1alpha2.AddToContainer(container, clientsets.Kubernetes(), nil, nil, nil))
-	urlruntime.Must(metricsv1alpha2.AddToContainer(nil, container, clientsets.Kubernetes(), nil))
-	urlruntime.Must(networkv1alpha2.AddToContainer(container, ""))
-	alertingOptions := &alerting.Options{}
-	alertingClient, _ := alerting.NewRuleClient(alertingOptions)
-	urlruntime.Must(alertingv2alpha1.AddToContainer(container, informerFactory, promfake.NewSimpleClientset(), alertingClient, alertingOptions))
 
 	config := restfulspec.Config{
 		WebServices:                   container.RegisteredWebServices(),
@@ -157,49 +122,10 @@ func generateSwaggerJson() []byte {
 			},
 		},
 		{
-			Name: "Access Management",
-			Tags: []string{
-				constants.ClusterMemberTag,
-				constants.WorkspaceMemberTag,
-				constants.DevOpsProjectMemberTag,
-				constants.NamespaceMemberTag,
-				constants.GlobalRoleTag,
-				constants.ClusterRoleTag,
-				constants.WorkspaceRoleTag,
-				constants.DevOpsProjectRoleTag,
-				constants.NamespaceRoleTag,
-			},
-		},
-		{
-			Name: "Multi-tenancy",
-			Tags: []string{
-				constants.WorkspaceTag,
-				constants.NamespaceTag,
-				constants.UserResourceTag,
-			},
-		},
-		{
-			Name: "Multi-cluster",
-			Tags: []string{
-				constants.MultiClusterTag,
-			},
-		},
-		{
 			Name: "Resources",
 			Tags: []string{
 				constants.ClusterResourcesTag,
 				constants.NamespaceResourcesTag,
-			},
-		},
-		{
-			Name: "App Store",
-			Tags: []string{
-				constants.OpenpitrixAppInstanceTag,
-				constants.OpenpitrixAppTemplateTag,
-				constants.OpenpitrixCategoryTag,
-				constants.OpenpitrixAttachmentTag,
-				constants.OpenpitrixRepositoryTag,
-				constants.OpenpitrixManagementTag,
 			},
 		},
 		{
@@ -209,19 +135,6 @@ func generateSwaggerJson() []byte {
 				constants.GitTag,
 				constants.ToolboxTag,
 				constants.TerminalTag,
-			},
-		},
-		{
-			Name: "DevOps",
-			Tags: []string{
-				constants.DevOpsProjectTag,
-				constants.DevOpsCredentialTag,
-				constants.DevOpsPipelineTag,
-				constants.DevOpsProjectMemberTag,
-				constants.DevOpsWebhookTag,
-				constants.DevOpsJenkinsfileTag,
-				constants.DevOpsScmTag,
-				constants.DevOpsJenkinsTag,
 			},
 		},
 		{
@@ -241,18 +154,6 @@ func generateSwaggerJson() []byte {
 		{
 			Name: "Logging",
 			Tags: []string{constants.LogQueryTag},
-		},
-		{
-			Name: "Events",
-			Tags: []string{constants.EventsQueryTag},
-		},
-		{
-			Name: "Auditing",
-			Tags: []string{constants.AuditingQueryTag},
-		},
-		{
-			Name: "Network",
-			Tags: []string{constants.NetworkTopologyTag},
 		},
 	})
 

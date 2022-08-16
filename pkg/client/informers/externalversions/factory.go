@@ -185,15 +185,11 @@ type SharedInformerFactory interface {
 
 	Application() application.Interface
 	Auditing() auditing.Interface
-	Cluster() cluster.Interface
-	Devops() devops.Interface
 	Iam() iam.Interface
 	Network() network.Interface
 	Notification() notification.Interface
 	Quota() quota.Interface
-	Servicemesh() servicemesh.Interface
 	Storage() storage.Interface
-	Tenant() tenant.Interface
 	Types() types.Interface
 }
 
