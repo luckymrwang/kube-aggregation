@@ -36,7 +36,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: ks-apiserver
         ports:
-        - containerPort: 9090
+        - containerPort: 9091
           protocol: TCP
         resources:
           {{- toYaml .Values.apiserver.resources | nindent 12 }}
@@ -57,7 +57,7 @@ spec:
           failureThreshold: 8
           httpGet:
             path: /kapis/version
-            port: 9090
+            port: 9091
             scheme: HTTP
           initialDelaySeconds: 15
           timeoutSeconds: 15
@@ -102,7 +102,7 @@ spec:
   ports:
   - port: 80
     protocol: TCP
-    targetPort: 9090
+    targetPort: 9091
   selector:
     app: ks-apiserver
     tier: backend
