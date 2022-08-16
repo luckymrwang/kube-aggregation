@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/emicklei/go-restful"
-	extv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -56,7 +55,6 @@ import (
 	"kube-aggregation/pkg/apiserver/request"
 	"kube-aggregation/pkg/informers"
 	configv1alpha2 "kube-aggregation/pkg/kapis/config/v1alpha2"
-	"kube-aggregation/pkg/kapis/crd"
 	resourcesv1alpha2 "kube-aggregation/pkg/kapis/resources/v1alpha2"
 	resourcev1alpha3 "kube-aggregation/pkg/kapis/resources/v1alpha3"
 	"kube-aggregation/pkg/kapis/version"
@@ -134,16 +132,7 @@ func (s *APIServer) installKubeSphereAPIs(stopCh <-chan struct{}) {
 	urlruntime.Must(version.AddToContainer(s.container, s.KubernetesClient.Kubernetes().Discovery()))
 }
 
-// installCRDAPIs Install CRDs to the KAPIs with List and Get options
-func (s *APIServer) installCRDAPIs() {
-	crds := &extv1.CustomResourceDefinitionList{}
-	// TODO Maybe we need a better label name
-	urlruntime.Must(s.RuntimeClient.List(context.TODO(), crds, runtimeclient.MatchingLabels{"kubesphere.io/resource-served": "true"}))
-	urlruntime.Must(crd.AddToContainer(s.container, s.RuntimeClient, s.RuntimeCache, crds))
-}
-
 func (s *APIServer) Run(ctx context.Context) (err error) {
-
 	err = s.waitForResourceSync(ctx)
 	if err != nil {
 		return err
