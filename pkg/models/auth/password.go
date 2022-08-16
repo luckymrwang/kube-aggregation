@@ -20,7 +20,6 @@ package auth
 
 import (
 	"context"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	kubesphere "kube-aggregation/pkg/client/clientset/versioned"
@@ -31,11 +30,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	authuser "k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/klog"
-	iamv1alpha2 "kubesphere.io/api/iam/v1alpha2"
-
 	"kube-aggregation/pkg/apiserver/authentication/identityprovider"
 	"kube-aggregation/pkg/apiserver/authentication/oauth"
-	iamv1alpha2listers "kube-aggregation/pkg/client/listers/iam/v1alpha2"
 	"kube-aggregation/pkg/constants"
 )
 
@@ -46,11 +42,9 @@ type passwordAuthenticator struct {
 }
 
 func NewPasswordAuthenticator(ksClient kubesphere.Interface,
-	userLister iamv1alpha2listers.UserLister,
 	options *authentication.Options) PasswordAuthenticator {
 	passwordAuthenticator := &passwordAuthenticator{
 		ksClient:    ksClient,
-		userGetter:  &userGetter{userLister: userLister},
 		authOptions: options,
 	}
 	return passwordAuthenticator
@@ -101,48 +95,12 @@ func (p *passwordAuthenticator) Authenticate(_ context.Context, username, passwo
 		}
 	}
 
-	// kubesphere account
-	user, err := p.userGetter.findUser(username)
-	if err != nil {
-		// ignore not found error
-		if !errors.IsNotFound(err) {
-			klog.Error(err)
-			return nil, "", err
-		}
-	}
-
-	// check user status
-	if user != nil && user.Status.State != iamv1alpha2.UserActive {
-		if user.Status.State == iamv1alpha2.UserAuthLimitExceeded {
-			klog.Errorf("%s, username: %s", RateLimitExceededError, username)
-			return nil, "", RateLimitExceededError
-		} else {
-			// state not active
-			klog.Errorf("%s, username: %s", AccountIsNotActiveError, username)
-			return nil, "", AccountIsNotActiveError
-		}
-	}
-
 	// if the password is not empty, means that the password has been reset, even if the user was mapping from IDP
-	if user != nil && user.Spec.EncryptedPassword != "" {
-		if err = PasswordVerify(user.Spec.EncryptedPassword, password); err != nil {
-			klog.Error(err)
-			return nil, "", err
-		}
-		u := &authuser.DefaultInfo{
-			Name:   user.Name,
-			Groups: user.Spec.Groups,
-		}
-		// check if the password is initialized
-		if uninitialized := user.Annotations[iamv1alpha2.UninitializedAnnotation]; uninitialized != "" {
-			u.Extra = map[string][]string{
-				iamv1alpha2.ExtraUninitialized: {uninitialized},
-			}
-		}
-		return u, "", nil
+	u := &authuser.DefaultInfo{
+		Name: username,
 	}
 
-	return nil, "", IncorrectPasswordError
+	return u, "", nil
 }
 
 func PasswordVerify(encryptedPassword, password string) error {

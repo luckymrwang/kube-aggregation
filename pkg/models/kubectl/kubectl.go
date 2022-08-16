@@ -33,7 +33,6 @@ import (
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	iamv1alpha2informers "kube-aggregation/pkg/client/informers/externalversions/iam/v1alpha2"
 	"kube-aggregation/pkg/models"
 
 	"kube-aggregation/pkg/constants"
@@ -53,14 +52,12 @@ type operator struct {
 	k8sClient          kubernetes.Interface
 	deploymentInformer appsv1informers.DeploymentInformer
 	podInformer        coreinfomers.PodInformer
-	userInformer       iamv1alpha2informers.UserInformer
 	kubectlImage       string
 }
 
 func NewOperator(k8sClient kubernetes.Interface, deploymentInformer appsv1informers.DeploymentInformer,
-	podInformer coreinfomers.PodInformer, userInformer iamv1alpha2informers.UserInformer, kubectlImage string) Interface {
-	return &operator{k8sClient: k8sClient, deploymentInformer: deploymentInformer, podInformer: podInformer,
-		userInformer: userInformer, kubectlImage: kubectlImage}
+	podInformer coreinfomers.PodInformer, kubectlImage string) Interface {
+	return &operator{k8sClient: k8sClient, deploymentInformer: deploymentInformer, podInformer: podInformer, kubectlImage: kubectlImage}
 }
 
 func (o *operator) GetKubectlPod(username string) (models.PodInfo, error) {
@@ -114,16 +111,6 @@ func selectCorrectPod(namespace string, pods []*v1.Pod) (kubectlPod *v1.Pod, err
 func (o *operator) CreateKubectlDeploy(username string, owner metav1.Object) error {
 	deployName := fmt.Sprintf(deployNameFormat, username)
 
-	_, err := o.userInformer.Lister().Get(username)
-	if err != nil {
-		klog.Error(err)
-		// ignore if user not exist
-		if errors.IsNotFound(err) {
-			return nil
-		}
-		return err
-	}
-
 	replica := int32(1)
 	selector := metav1.LabelSelector{MatchLabels: map[string]string{constants.UsernameLabelKey: username}}
 	deployment := &appsv1.Deployment{
@@ -169,7 +156,7 @@ func (o *operator) CreateKubectlDeploy(username string, owner metav1.Object) err
 	}
 
 	// bind the lifecycle of role binding
-	err = controllerutil.SetControllerReference(owner, deployment, scheme.Scheme)
+	err := controllerutil.SetControllerReference(owner, deployment, scheme.Scheme)
 	if err != nil {
 		klog.Errorln(err)
 		return err

@@ -33,7 +33,6 @@ import (
 	"kube-aggregation/pkg/informers"
 	"kube-aggregation/pkg/models"
 	gitmodel "kube-aggregation/pkg/models/git"
-	registriesmodel "kube-aggregation/pkg/models/registries"
 	"kube-aggregation/pkg/server/errors"
 	"kube-aggregation/pkg/server/params"
 )
@@ -117,46 +116,6 @@ func AddToContainer(c *restful.Container, k8sClient kubernetes.Interface, factor
 		Doc("Get the health status of system components.").
 		Returns(http.StatusOK, api.StatusOK, v1alpha2.HealthStatus{}))
 
-	webservice.Route(webservice.GET("/quotas").
-		To(handler.handleGetClusterQuotas).
-		Doc("get whole cluster's resource usage").
-		Returns(http.StatusOK, api.StatusOK, api.ResourceQuota{}).
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.ClusterResourcesTag}))
-
-	webservice.Route(webservice.GET("/namespaces/{namespace}/quotas").
-		Doc("get specified namespace's resource quota and usage").
-		Param(webservice.PathParameter("namespace", "the name of the project")).
-		Returns(http.StatusOK, api.StatusOK, api.ResourceQuota{}).
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.NamespaceResourcesTag}).
-		To(handler.handleGetNamespaceQuotas))
-
-	webservice.Route(webservice.POST("registry/verify").
-		Deprecate().
-		To(handler.handleVerifyRegistryCredential).
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.RegistryTag}).
-		Doc("verify if a user has access to the docker registry").
-		Reads(api.RegistryCredential{}).
-		Returns(http.StatusOK, api.StatusOK, errors.Error{}))
-	webservice.Route(webservice.GET("/registry/blob").
-		Deprecate().
-		To(handler.handleGetRegistryEntry).
-		Param(webservice.QueryParameter("image", "query image, condition for filtering.").
-			Required(true).
-			DataFormat("image=%s")).
-		Param(webservice.QueryParameter("namespace", "namespace which secret in.").
-			Required(false).
-			DataFormat("namespace=%s")).
-		Param(webservice.QueryParameter("secret", "secret name").
-			Required(false).
-			DataFormat("secret=%s")).
-		Param(webservice.QueryParameter("insecure", "whether verify cert if using https repo").
-			Required(false).
-			DataFormat("insecure=%s")).
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.RegistryTag}).
-		Doc("Retrieve the blob from the registry identified").
-		Writes(registriesmodel.ImageDetails{}).
-		Returns(http.StatusOK, api.StatusOK, registriesmodel.ImageDetails{}),
-	)
 	webservice.Route(webservice.POST("git/verify").
 		To(handler.handleVerifyGitCredential).
 		Metadata(restfulspec.KeyOpenAPITags, []string{constants.GitTag}).

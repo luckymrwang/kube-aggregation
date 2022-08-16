@@ -18,6 +18,7 @@ package dispatch
 
 import (
 	"fmt"
+	"kube-aggregation/pkg/utils/clusterclient"
 	"net/http"
 	"strings"
 
@@ -30,7 +31,6 @@ import (
 	clusterv1alpha1 "kubesphere.io/api/cluster/v1alpha1"
 
 	"kube-aggregation/pkg/apiserver/request"
-	"kube-aggregation/pkg/utils/clusterclient"
 )
 
 const proxyURLFormat = "/api/v1/namespaces/kubesphere-system/services/:ks-apiserver:/proxy%s"

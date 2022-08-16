@@ -34,8 +34,6 @@ import (
 	"kube-aggregation/pkg/models/git"
 	"kube-aggregation/pkg/models/kubeconfig"
 	"kube-aggregation/pkg/models/kubectl"
-	"kube-aggregation/pkg/models/quotas"
-	"kube-aggregation/pkg/models/registries"
 	"kube-aggregation/pkg/models/resources/v1alpha2"
 	"kube-aggregation/pkg/models/resources/v1alpha2/resource"
 	"kube-aggregation/pkg/models/revisions"
@@ -45,31 +43,26 @@ import (
 )
 
 type resourceHandler struct {
-	resourcesGetter     *resource.ResourceGetter
-	componentsGetter    components.ComponentsGetter
-	resourceQuotaGetter quotas.ResourceQuotaGetter
-	revisionGetter      revisions.RevisionGetter
-	routerOperator      routers.RouterOperator
-	gitVerifier         git.GitVerifier
-	registryGetter      registries.RegistryGetter
-	kubeconfigOperator  kubeconfig.Interface
-	kubectlOperator     kubectl.Interface
+	resourcesGetter    *resource.ResourceGetter
+	componentsGetter   components.ComponentsGetter
+	revisionGetter     revisions.RevisionGetter
+	routerOperator     routers.RouterOperator
+	gitVerifier        git.GitVerifier
+	kubeconfigOperator kubeconfig.Interface
+	kubectlOperator    kubectl.Interface
 }
 
 func newResourceHandler(k8sClient kubernetes.Interface, factory informers.InformerFactory, masterURL string) *resourceHandler {
 
 	return &resourceHandler{
-		resourcesGetter:     resource.NewResourceGetter(factory),
-		componentsGetter:    components.NewComponentsGetter(factory.KubernetesSharedInformerFactory()),
-		resourceQuotaGetter: quotas.NewResourceQuotaGetter(factory.KubernetesSharedInformerFactory()),
-		revisionGetter:      revisions.NewRevisionGetter(factory.KubernetesSharedInformerFactory()),
-		routerOperator:      routers.NewRouterOperator(k8sClient, factory.KubernetesSharedInformerFactory()),
-		gitVerifier:         git.NewGitVerifier(factory.KubernetesSharedInformerFactory()),
-		registryGetter:      registries.NewRegistryGetter(factory.KubernetesSharedInformerFactory()),
-		kubeconfigOperator:  kubeconfig.NewReadOnlyOperator(factory.KubernetesSharedInformerFactory().Core().V1().ConfigMaps().Lister(), masterURL),
+		resourcesGetter:    resource.NewResourceGetter(factory),
+		componentsGetter:   components.NewComponentsGetter(factory.KubernetesSharedInformerFactory()),
+		revisionGetter:     revisions.NewRevisionGetter(factory.KubernetesSharedInformerFactory()),
+		routerOperator:     routers.NewRouterOperator(k8sClient, factory.KubernetesSharedInformerFactory()),
+		gitVerifier:        git.NewGitVerifier(factory.KubernetesSharedInformerFactory()),
+		kubeconfigOperator: kubeconfig.NewReadOnlyOperator(factory.KubernetesSharedInformerFactory().Core().V1().ConfigMaps().Lister(), masterURL),
 		kubectlOperator: kubectl.NewOperator(nil, factory.KubernetesSharedInformerFactory().Apps().V1().Deployments(),
-			factory.KubernetesSharedInformerFactory().Core().V1().Pods(),
-			factory.KubeSphereSharedInformerFactory().Iam().V1alpha2().Users(), ""),
+			factory.KubernetesSharedInformerFactory().Core().V1().Pods(), ""),
 	}
 }
 
@@ -134,28 +127,6 @@ func (r *resourceHandler) handleGetComponents(_ *restful.Request, response *rest
 	}
 
 	response.WriteAsJson(result)
-}
-
-func (r *resourceHandler) handleGetClusterQuotas(_ *restful.Request, response *restful.Response) {
-	result, err := r.resourceQuotaGetter.GetClusterQuota()
-	if err != nil {
-		api.HandleInternalError(response, nil, err)
-		return
-	}
-
-	response.WriteAsJson(result)
-}
-
-func (r *resourceHandler) handleGetNamespaceQuotas(request *restful.Request, response *restful.Response) {
-	namespace := request.PathParameter("namespace")
-	quota, err := r.resourceQuotaGetter.GetNamespaceQuota(namespace)
-
-	if err != nil {
-		api.HandleInternalError(response, nil, err)
-		return
-	}
-
-	response.WriteAsJson(quota)
 }
 
 func (r *resourceHandler) handleGetDaemonSetRevision(request *restful.Request, response *restful.Response) {
@@ -304,38 +275,6 @@ func (r *resourceHandler) handleVerifyGitCredential(request *restful.Request, re
 		return
 	}
 	response.WriteAsJson(errors.None)
-}
-
-func (r *resourceHandler) handleVerifyRegistryCredential(request *restful.Request, response *restful.Response) {
-	var credential api.RegistryCredential
-	err := request.ReadEntity(&credential)
-	if err != nil {
-		api.HandleBadRequest(response, nil, err)
-		return
-	}
-
-	err = r.registryGetter.VerifyRegistryCredential(credential)
-	if err != nil {
-		api.HandleBadRequest(response, nil, err)
-		return
-	}
-
-	response.WriteHeader(http.StatusOK)
-}
-
-func (r *resourceHandler) handleGetRegistryEntry(request *restful.Request, response *restful.Response) {
-	imageName := request.QueryParameter("image")
-	namespace := request.QueryParameter("namespace")
-	secretName := request.QueryParameter("secret")
-	insecure := request.QueryParameter("insecure") == "true"
-
-	detail, err := r.registryGetter.GetEntry(namespace, secretName, imageName, insecure)
-	if err != nil {
-		api.HandleBadRequest(response, nil, err)
-		return
-	}
-
-	response.WriteAsJson(detail)
 }
 
 func (r *resourceHandler) handleGetNamespacedAbnormalWorkloads(request *restful.Request, response *restful.Response) {

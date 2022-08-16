@@ -38,13 +38,8 @@ import (
 	"kube-aggregation/pkg/models/resources/v1alpha3/daemonset"
 	"kube-aggregation/pkg/models/resources/v1alpha3/dashboard"
 	"kube-aggregation/pkg/models/resources/v1alpha3/deployment"
-	"kube-aggregation/pkg/models/resources/v1alpha3/globalrole"
-	"kube-aggregation/pkg/models/resources/v1alpha3/globalrolebinding"
-	"kube-aggregation/pkg/models/resources/v1alpha3/group"
-	"kube-aggregation/pkg/models/resources/v1alpha3/groupbinding"
 	"kube-aggregation/pkg/models/resources/v1alpha3/ingress"
 	"kube-aggregation/pkg/models/resources/v1alpha3/job"
-	"kube-aggregation/pkg/models/resources/v1alpha3/loginrecord"
 	"kube-aggregation/pkg/models/resources/v1alpha3/namespace"
 	"kube-aggregation/pkg/models/resources/v1alpha3/networkpolicy"
 	"kube-aggregation/pkg/models/resources/v1alpha3/node"
@@ -55,7 +50,6 @@ import (
 	"kube-aggregation/pkg/models/resources/v1alpha3/service"
 	"kube-aggregation/pkg/models/resources/v1alpha3/serviceaccount"
 	"kube-aggregation/pkg/models/resources/v1alpha3/statefulset"
-	"kube-aggregation/pkg/models/resources/v1alpha3/user"
 	iamv1alpha2 "kubesphere.io/api/iam/v1alpha2"
 )
 
@@ -89,12 +83,6 @@ func NewResourceGetter(factory informers.InformerFactory, cache cache.Cache) *Re
 	clusterResourceGetters[schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}] = namespace.New(factory.KubernetesSharedInformerFactory())
 
 	// kubesphere resources
-	clusterResourceGetters[iamv1alpha2.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcesPluralGlobalRole)] = globalrole.New(factory.KubeSphereSharedInformerFactory())
-	clusterResourceGetters[iamv1alpha2.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcesPluralUser)] = user.New(factory.KubeSphereSharedInformerFactory(), factory.KubernetesSharedInformerFactory())
-	clusterResourceGetters[iamv1alpha2.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcesPluralGlobalRoleBinding)] = globalrolebinding.New(factory.KubeSphereSharedInformerFactory())
-	clusterResourceGetters[iamv1alpha2.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcesPluralLoginRecord)] = loginrecord.New(factory.KubeSphereSharedInformerFactory())
-	clusterResourceGetters[iamv1alpha2.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcePluralGroup)] = group.New(factory.KubeSphereSharedInformerFactory())
-	clusterResourceGetters[iamv1alpha2.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcePluralGroupBinding)] = groupbinding.New(factory.KubeSphereSharedInformerFactory())
 	clusterResourceGetters[rbacv1.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcesPluralClusterRole)] = clusterrole.New(factory.KubernetesSharedInformerFactory())
 	clusterResourceGetters[rbacv1.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcesPluralClusterRoleBinding)] = clusterrolebinding.New(factory.KubernetesSharedInformerFactory())
 	clusterResourceGetters[monitoringdashboardv1alpha2.GroupVersion.WithResource("clusterdashboards")] = clusterdashboard.New(cache)

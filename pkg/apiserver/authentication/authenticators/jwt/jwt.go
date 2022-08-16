@@ -23,11 +23,7 @@ import (
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/klog"
 
-	iamv1alpha2 "kubesphere.io/api/iam/v1alpha2"
-
 	"kube-aggregation/pkg/models/auth"
-
-	iamv1alpha2listers "kube-aggregation/pkg/client/listers/iam/v1alpha2"
 )
 
 // TokenAuthenticator implements kubernetes token authenticate interface with our custom logic.
@@ -37,13 +33,11 @@ import (
 // because some resources are public accessible.
 type tokenAuthenticator struct {
 	tokenOperator auth.TokenManagementInterface
-	userLister    iamv1alpha2listers.UserLister
 }
 
-func NewTokenAuthenticator(tokenOperator auth.TokenManagementInterface, userLister iamv1alpha2listers.UserLister) authenticator.Token {
+func NewTokenAuthenticator(tokenOperator auth.TokenManagementInterface) authenticator.Token {
 	return &tokenAuthenticator{
 		tokenOperator: tokenOperator,
-		userLister:    userLister,
 	}
 }
 
@@ -54,25 +48,11 @@ func (t *tokenAuthenticator) AuthenticateToken(ctx context.Context, token string
 		return nil, false, err
 	}
 
-	if verified.User.GetName() == iamv1alpha2.PreRegistrationUser {
-		return &authenticator.Response{
-			User: verified.User,
-		}, true, nil
-	}
-
-	userInfo, err := t.userLister.Get(verified.User.GetName())
-	if err != nil {
-		return nil, false, err
-	}
-
 	// AuthLimitExceeded state should be ignored
-	if userInfo.Status.State == iamv1alpha2.UserDisabled {
-		return nil, false, auth.AccountIsNotActiveError
-	}
 	return &authenticator.Response{
 		User: &user.DefaultInfo{
-			Name:   userInfo.GetName(),
-			Groups: append(userInfo.Spec.Groups, user.AllAuthenticated),
+			Name:   verified.User.GetName(),
+			Groups: append(verified.User.GetGroups(), user.AllAuthenticated),
 		},
 	}, true, nil
 }

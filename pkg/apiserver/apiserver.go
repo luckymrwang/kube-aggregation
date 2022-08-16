@@ -40,7 +40,6 @@ import (
 	"k8s.io/klog"
 	clusterv1alpha1 "kubesphere.io/api/cluster/v1alpha1"
 	iamv1alpha2 "kubesphere.io/api/iam/v1alpha2"
-	typesv1beta1 "kubesphere.io/api/types/v1beta1"
 	runtimecache "sigs.k8s.io/controller-runtime/pkg/cache"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -230,19 +229,13 @@ func (s *APIServer) buildHandlerChain(stopCh <-chan struct{}) {
 		handler = filters.WithMultipleClusterDispatcher(handler, clusterDispatcher)
 	}
 
-	userLister := s.InformerFactory.KubeSphereSharedInformerFactory().Iam().V1alpha2().Users().Lister()
-	loginRecorder := auth.NewLoginRecorder(s.KubernetesClient.KubeSphere(), userLister)
-
 	// authenticators are unordered
 	authn := unionauth.New(anonymous.NewAuthenticator(),
 		basictoken.New(basic.NewBasicAuthenticator(auth.NewPasswordAuthenticator(
 			s.KubernetesClient.KubeSphere(),
-			userLister,
-			s.Config.AuthenticationOptions),
-			loginRecorder)),
+			s.Config.AuthenticationOptions))),
 		bearertoken.New(jwt.NewTokenAuthenticator(
-			auth.NewTokenOperator(s.CacheClient, s.Issuer, s.Config.AuthenticationOptions),
-			userLister)))
+			auth.NewTokenOperator(s.CacheClient, s.Issuer, s.Config.AuthenticationOptions))))
 	handler = filters.WithAuthentication(handler, authn)
 	handler = filters.WithRequestInfo(handler, requestInfoResolver)
 
@@ -308,12 +301,6 @@ func (s *APIServer) waitForResourceSync(ctx context.Context) error {
 			"configmaps",
 			"serviceaccounts",
 		},
-		{Group: "rbac.authorization.k8s.io", Version: "v1"}: {
-			"roles",
-			"rolebindings",
-			"clusterroles",
-			"clusterrolebindings",
-		},
 		{Group: "apps", Version: "v1"}: {
 			"deployments",
 			"daemonsets",
@@ -349,34 +336,9 @@ func (s *APIServer) waitForResourceSync(ctx context.Context) error {
 	}
 
 	ksGVRs := map[schema.GroupVersion][]string{
-		{Group: "iam.kubesphere.io", Version: "v1alpha2"}: {
-			"users",
-			"globalroles",
-			"globalrolebindings",
-			"groups",
-			"groupbindings",
-			"loginrecords",
-		},
-		{Group: "cluster.kubesphere.io", Version: "v1alpha1"}: {
-			"clusters",
-		},
-	}
-
-	// federated resources on cached in multi cluster setup
-	if s.Config.MultiClusterOptions.Enable {
-		ksGVRs[typesv1beta1.SchemeGroupVersion] = []string{
-			typesv1beta1.ResourcePluralFederatedClusterRole,
-			typesv1beta1.ResourcePluralFederatedClusterRoleBindingBinding,
-			typesv1beta1.ResourcePluralFederatedNamespace,
-			typesv1beta1.ResourcePluralFederatedService,
-			typesv1beta1.ResourcePluralFederatedDeployment,
-			typesv1beta1.ResourcePluralFederatedSecret,
-			typesv1beta1.ResourcePluralFederatedConfigmap,
-			typesv1beta1.ResourcePluralFederatedStatefulSet,
-			typesv1beta1.ResourcePluralFederatedIngress,
-			typesv1beta1.ResourcePluralFederatedPersistentVolumeClaim,
-			typesv1beta1.ResourcePluralFederatedApplication,
-		}
+		//{Group: "cluster.kubesphere.io", Version: "v1alpha1"}: {
+		//	"clusters",
+		//},
 	}
 
 	if err := waitForCacheSync(s.KubernetesClient.Kubernetes().Discovery(),
