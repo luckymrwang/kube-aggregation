@@ -23,11 +23,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 
 	"kube-aggregation/pkg/api"
-	"kube-aggregation/pkg/api/resource/v1alpha2"
 	"kube-aggregation/pkg/apiserver/query"
 	"kube-aggregation/pkg/apiserver/runtime"
 	"kube-aggregation/pkg/informers"
-	"kube-aggregation/pkg/models/components"
 	resourcev1alpha2 "kube-aggregation/pkg/models/resources/v1alpha2/resource"
 	resourcev1alpha3 "kube-aggregation/pkg/models/resources/v1alpha3/resource"
 
@@ -53,7 +51,7 @@ func Resource(resource string) schema.GroupResource {
 func AddToContainer(c *restful.Container, informerFactory informers.InformerFactory, cache cache.Cache) error {
 
 	webservice := runtime.NewWebService(GroupVersion)
-	handler := New(resourcev1alpha3.NewResourceGetter(informerFactory, cache), resourcev1alpha2.NewResourceGetter(informerFactory), components.NewComponentsGetter(informerFactory.KubernetesSharedInformerFactory()))
+	handler := New(resourcev1alpha3.NewResourceGetter(informerFactory, cache), resourcev1alpha2.NewResourceGetter(informerFactory))
 
 	webservice.Route(webservice.GET("/{resources}").
 		To(handler.handleListResources).
@@ -96,23 +94,6 @@ func AddToContainer(c *restful.Container, informerFactory informers.InformerFact
 		Param(webservice.PathParameter("resources", "namespace level resource type, e.g. pods,jobs,configmaps,services.")).
 		Param(webservice.PathParameter("name", "the name of resource")).
 		Returns(http.StatusOK, ok, api.ListResult{}))
-
-	webservice.Route(webservice.GET("/components").
-		To(handler.handleGetComponents).
-		Metadata(restfulspec.KeyOpenAPITags, []string{tagComponentStatus}).
-		Doc("List the system components.").
-		Returns(http.StatusOK, ok, []v1alpha2.ComponentStatus{}))
-	webservice.Route(webservice.GET("/components/{component}").
-		To(handler.handleGetComponentStatus).
-		Metadata(restfulspec.KeyOpenAPITags, []string{tagComponentStatus}).
-		Doc("Describe the specified system component.").
-		Param(webservice.PathParameter("component", "component name")).
-		Returns(http.StatusOK, ok, v1alpha2.ComponentStatus{}))
-	webservice.Route(webservice.GET("/componenthealth").
-		To(handler.handleGetSystemHealthStatus).
-		Metadata(restfulspec.KeyOpenAPITags, []string{tagComponentStatus}).
-		Doc("Get the health status of system components.").
-		Returns(http.StatusOK, ok, v1alpha2.HealthStatus{}))
 
 	c.Add(webservice)
 

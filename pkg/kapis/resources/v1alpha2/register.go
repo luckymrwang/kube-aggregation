@@ -26,7 +26,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"kube-aggregation/pkg/api"
-	"kube-aggregation/pkg/api/resource/v1alpha2"
 	"kube-aggregation/pkg/apiserver/runtime"
 	"kube-aggregation/pkg/constants"
 	"kube-aggregation/pkg/informers"
@@ -79,39 +78,6 @@ func AddToContainer(c *restful.Container, k8sClient kubernetes.Interface, factor
 			DefaultValue("limit=10,page=1")).
 		Param(webservice.QueryParameter(params.ReverseParam, "sort parameters, e.g. reverse=true")).
 		Param(webservice.QueryParameter(params.OrderByParam, "sort parameters, e.g. orderBy=createTime")))
-
-	webservice.Route(webservice.GET("/users/{user}/kubectl").
-		To(handler.GetKubectlPod).
-		Doc("get user's kubectl pod").
-		Param(webservice.PathParameter("user", "username")).
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.ToolboxTag}).
-		Returns(http.StatusOK, api.StatusOK, models.PodInfo{}))
-
-	webservice.Route(webservice.GET("/users/{user}/kubeconfig").
-		Produces("text/plain", restful.MIME_JSON).
-		To(handler.GetKubeconfig).
-		Doc("get users' kubeconfig").
-		Param(webservice.PathParameter("user", "username")).
-		Returns(http.StatusOK, api.StatusOK, "").
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.ToolboxTag}))
-
-	webservice.Route(webservice.GET("/components").
-		To(handler.handleGetComponents).
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.ComponentStatusTag}).
-		Doc("List the system components.").
-		Returns(http.StatusOK, api.StatusOK, []v1alpha2.ComponentStatus{}))
-
-	webservice.Route(webservice.GET("/components/{component}").
-		To(handler.handleGetComponentStatus).
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.ComponentStatusTag}).
-		Doc("Describe the specified system component.").
-		Param(webservice.PathParameter("component", "component name")).
-		Returns(http.StatusOK, api.StatusOK, v1alpha2.ComponentStatus{}))
-	webservice.Route(webservice.GET("/componenthealth").
-		To(handler.handleGetSystemHealthStatus).
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.ComponentStatusTag}).
-		Doc("Get the health status of system components.").
-		Returns(http.StatusOK, api.StatusOK, v1alpha2.HealthStatus{}))
 
 	webservice.Route(webservice.GET("/namespaces/{namespace}/daemonsets/{daemonset}/revisions/{revision}").
 		To(handler.handleGetDaemonSetRevision).

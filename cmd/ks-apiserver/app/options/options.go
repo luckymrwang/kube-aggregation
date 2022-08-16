@@ -101,8 +101,7 @@ func (s *ServerRunOptions) NewAPIServer(stopCh <-chan struct{}) (*apiserver.APIS
 	}
 	apiServer.KubernetesClient = kubernetesClient
 
-	informerFactory := informers.NewInformerFactories(kubernetesClient.Kubernetes(), kubernetesClient.KubeSphere(),
-		kubernetesClient.Prometheus())
+	informerFactory := informers.NewInformerFactories(kubernetesClient.Kubernetes(), kubernetesClient.KubeSphere())
 	apiServer.InformerFactory = informerFactory
 
 	var cacheClient cache.Interface

@@ -24,7 +24,6 @@ import (
 
 	"kube-aggregation/pkg/api"
 	"kube-aggregation/pkg/apiserver/query"
-	"kube-aggregation/pkg/models/components"
 	"kube-aggregation/pkg/models/resources/v1alpha2"
 	resourcev1alpha2 "kube-aggregation/pkg/models/resources/v1alpha2/resource"
 	resourcev1alpha3 "kube-aggregation/pkg/models/resources/v1alpha3/resource"
@@ -34,14 +33,12 @@ import (
 type Handler struct {
 	resourceGetterV1alpha3  *resourcev1alpha3.ResourceGetter
 	resourcesGetterV1alpha2 *resourcev1alpha2.ResourceGetter
-	componentsGetter        components.ComponentsGetter
 }
 
-func New(resourceGetterV1alpha3 *resourcev1alpha3.ResourceGetter, resourcesGetterV1alpha2 *resourcev1alpha2.ResourceGetter, componentsGetter components.ComponentsGetter) *Handler {
+func New(resourceGetterV1alpha3 *resourcev1alpha3.ResourceGetter, resourcesGetterV1alpha2 *resourcev1alpha2.ResourceGetter) *Handler {
 	return &Handler{
 		resourceGetterV1alpha3:  resourceGetterV1alpha3,
 		resourcesGetterV1alpha2: resourcesGetterV1alpha2,
-		componentsGetter:        componentsGetter,
 	}
 }
 
@@ -168,48 +165,4 @@ func (h *Handler) fallback(resourceType string, namespace string, q *query.Query
 		Items:      result.Items,
 		TotalItems: result.TotalCount,
 	}, nil
-}
-
-func (h *Handler) handleGetComponentStatus(request *restful.Request, response *restful.Response) {
-	component := request.PathParameter("component")
-	result, err := h.componentsGetter.GetComponentStatus(component)
-	if err != nil {
-		klog.Error(err)
-		api.HandleInternalError(response, nil, err)
-		return
-	}
-	response.WriteEntity(result)
-}
-
-func (h *Handler) handleGetSystemHealthStatus(request *restful.Request, response *restful.Response) {
-	result, err := h.componentsGetter.GetSystemHealthStatus()
-	if err != nil {
-		klog.Error(err)
-		api.HandleInternalError(response, nil, err)
-		return
-	}
-
-	response.WriteEntity(result)
-}
-
-// get all componentsHandler
-func (h *Handler) handleGetComponents(request *restful.Request, response *restful.Response) {
-	result, err := h.componentsGetter.GetAllComponentsStatus()
-	if err != nil {
-		klog.Error(err)
-		api.HandleInternalError(response, nil, err)
-		return
-	}
-
-	response.WriteEntity(result)
-}
-
-func canonicalizeRegistryError(request *restful.Request, response *restful.Response, err error) {
-	if strings.Contains(err.Error(), "Unauthorized") {
-		api.HandleUnauthorized(response, request, err)
-	} else if strings.Contains(err.Error(), "MANIFEST_UNKNOWN") {
-		api.HandleNotFound(response, request, err)
-	} else {
-		api.HandleBadRequest(response, request, err)
-	}
 }

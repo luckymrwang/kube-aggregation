@@ -30,7 +30,6 @@ import (
 type Client interface {
 	Kubernetes() kubernetes.Interface
 	KubeSphere() kubesphere.Interface
-	Prometheus() promresourcesclient.Interface
 	Master() string
 	Config() *rest.Config
 }

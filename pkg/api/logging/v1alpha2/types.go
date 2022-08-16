@@ -26,10 +26,8 @@ import (
 )
 
 const (
-	OperationStatistics = "statistics"
-	OperationHistogram  = "histogram"
-	OperationQuery      = "query"
-	OperationExport     = "export"
+	OperationHistogram = "histogram"
+	OperationQuery     = "query"
 
 	DefaultInterval = "15m"
 	DefaultSize     = 10

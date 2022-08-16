@@ -21,7 +21,6 @@ import (
 	"time"
 
 	prominformers "github.com/prometheus-operator/prometheus-operator/pkg/client/informers/externalversions"
-	promresourcesclient "github.com/prometheus-operator/prometheus-operator/pkg/client/versioned"
 	k8sinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 
@@ -37,7 +36,6 @@ const defaultResync = 600 * time.Second
 type InformerFactory interface {
 	KubernetesSharedInformerFactory() k8sinformers.SharedInformerFactory
 	KubeSphereSharedInformerFactory() ksinformers.SharedInformerFactory
-	PrometheusSharedInformerFactory() prominformers.SharedInformerFactory
 
 	// Start shared informer factory one by one if they are not nil
 	Start(stopCh <-chan struct{})
@@ -54,8 +52,7 @@ type informerFactories struct {
 	prometheusInformerFactory prominformers.SharedInformerFactory
 }
 
-func NewInformerFactories(client kubernetes.Interface, ksClient versioned.Interface,
-	prometheusClient promresourcesclient.Interface) InformerFactory {
+func NewInformerFactories(client kubernetes.Interface, ksClient versioned.Interface) InformerFactory {
 	factory := &informerFactories{}
 
 	if client != nil {
@@ -64,10 +61,6 @@ func NewInformerFactories(client kubernetes.Interface, ksClient versioned.Interf
 
 	if ksClient != nil {
 		factory.ksInformerFactory = ksinformers.NewSharedInformerFactory(ksClient, defaultResync)
-	}
-
-	if prometheusClient != nil {
-		factory.prometheusInformerFactory = prominformers.NewSharedInformerFactory(prometheusClient, defaultResync)
 	}
 
 	return factory
