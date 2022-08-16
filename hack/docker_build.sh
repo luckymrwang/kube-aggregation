@@ -36,5 +36,4 @@ ${CONTAINER_CLI} "${CONTAINER_BUILDER}" \
 
 if [[ -z "${DRY_RUN:-}" ]]; then
   ${CONTAINER_CLI} push "${REPO}"/ks-apiserver:"${TAG}"
-  ${CONTAINER_CLI} push "${REPO}"/ks-controller-manager:"${TAG}"
 fi

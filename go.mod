@@ -38,7 +38,6 @@ require (
 	github.com/json-iterator/go v1.1.11
 	github.com/jszwec/csvutil v1.5.0
 	github.com/kubernetes-csi/external-snapshotter/client/v4 v4.2.0
-	github.com/kubesphere/pvc-autoresizer v0.1.1
 	github.com/kubesphere/storageclass-accessor v0.2.0
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/onsi/ginkgo v1.16.4
