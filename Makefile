@@ -6,8 +6,8 @@
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
-GV="iam:v1alpha2 cluster:v1alpha1 storage:v1alpha1 types:v1beta1 quota:v1alpha2 application:v1alpha1"
-MANIFESTS="application/* cluster/* iam/*  quota/* storage/*"
+GV="cluster:v1alpha1 storage:v1alpha1"
+MANIFESTS="cluster/* storage/*"
 
 # App Version
 APP_VERSION = v3.2.0
@@ -61,13 +61,6 @@ ks-apiserver: ; $(info $(M)...Begin to build ks-apiserver binary.)  @ ## Build k
 # Run all verify scripts hack/verify-*.sh
 verify-all: ; $(info $(M)...Begin to run all verify scripts hack/verify-*.sh.)  @ ## Run all verify scripts hack/verify-*.sh.
 	hack/verify-all.sh
-
-# Build e2e binary
-e2e: ;$(info $(M)...Begin to build e2e binary.)  @ ## Build e2e binary.
-	hack/build_e2e.sh test/e2e
-
-kind-e2e: ;$(info $(M)...Run e2e test.) @ ## Run e2e test in kind.
-	hack/kind_e2e.sh
 
 # Run go fmt against code
 fmt: ;$(info $(M)...Begin to run go fmt against code.)  @ ## Run go fmt against code.
