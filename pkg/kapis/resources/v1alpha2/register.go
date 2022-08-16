@@ -22,7 +22,6 @@ import (
 	"github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 
@@ -32,8 +31,6 @@ import (
 	"kube-aggregation/pkg/constants"
 	"kube-aggregation/pkg/informers"
 	"kube-aggregation/pkg/models"
-	gitmodel "kube-aggregation/pkg/models/git"
-	"kube-aggregation/pkg/server/errors"
 	"kube-aggregation/pkg/server/params"
 )
 
@@ -116,14 +113,6 @@ func AddToContainer(c *restful.Container, k8sClient kubernetes.Interface, factor
 		Doc("Get the health status of system components.").
 		Returns(http.StatusOK, api.StatusOK, v1alpha2.HealthStatus{}))
 
-	webservice.Route(webservice.POST("git/verify").
-		To(handler.handleVerifyGitCredential).
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.GitTag}).
-		Doc("Verify if the kubernetes secret has read access to the git repository").
-		Reads(gitmodel.AuthInfo{}).
-		Returns(http.StatusOK, api.StatusOK, errors.Error{}),
-	)
-
 	webservice.Route(webservice.GET("/namespaces/{namespace}/daemonsets/{daemonset}/revisions/{revision}").
 		To(handler.handleGetDaemonSetRevision).
 		Metadata(restfulspec.KeyOpenAPITags, []string{constants.NamespaceResourcesTag}).
@@ -148,38 +137,6 @@ func AddToContainer(c *restful.Container, k8sClient kubernetes.Interface, factor
 		Param(webservice.PathParameter("namespace", "the namespace of the statefulset")).
 		Param(webservice.PathParameter("revision", "the revision of the statefulset")).
 		Returns(http.StatusOK, api.StatusOK, appsv1.StatefulSet{}))
-
-	webservice.Route(webservice.GET("/namespaces/{namespace}/router").
-		Deprecate().
-		To(handler.handleGetRouter).
-		Doc("List router of a specified project").
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.NamespaceResourcesTag}).
-		Returns(http.StatusOK, api.StatusOK, corev1.Service{}).
-		Param(webservice.PathParameter("namespace", "the name of the project")))
-
-	webservice.Route(webservice.DELETE("/namespaces/{namespace}/router").
-		Deprecate().
-		To(handler.handleDeleteRouter).
-		Doc("List router of a specified project").
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.NamespaceResourcesTag}).
-		Returns(http.StatusOK, api.StatusOK, corev1.Service{}).
-		Param(webservice.PathParameter("namespace", "the name of the project")))
-
-	webservice.Route(webservice.POST("/namespaces/{namespace}/router").
-		Deprecate().
-		To(handler.handleCreateRouter).
-		Doc("Create a router for a specified project").
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.NamespaceResourcesTag}).
-		Returns(http.StatusOK, api.StatusOK, corev1.Service{}).
-		Param(webservice.PathParameter("namespace", "the name of the project")))
-
-	webservice.Route(webservice.PUT("/namespaces/{namespace}/router").
-		Deprecate().
-		To(handler.handleUpdateRouter).
-		Doc("Update a router for a specified project").
-		Metadata(restfulspec.KeyOpenAPITags, []string{constants.NamespaceResourcesTag}).
-		Returns(http.StatusOK, api.StatusOK, corev1.Service{}).
-		Param(webservice.PathParameter("namespace", "the name of the project")))
 
 	webservice.Route(webservice.GET("/abnormalworkloads").
 		Doc("get abnormal workloads' count of whole cluster").

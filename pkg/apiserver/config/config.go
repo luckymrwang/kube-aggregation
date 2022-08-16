@@ -33,12 +33,8 @@ import (
 	"kube-aggregation/pkg/constants"
 	"kube-aggregation/pkg/simple/client/cache"
 	"kube-aggregation/pkg/simple/client/k8s"
-	"kube-aggregation/pkg/simple/client/ldap"
 	"kube-aggregation/pkg/simple/client/logging"
-	"kube-aggregation/pkg/simple/client/metering"
-	"kube-aggregation/pkg/simple/client/monitoring/prometheus"
 	"kube-aggregation/pkg/simple/client/multicluster"
-	"kube-aggregation/pkg/simple/client/notification"
 )
 
 // Package config saves configuration for running KubeSphere components
@@ -139,29 +135,22 @@ func defaultConfig() *config {
 // Config defines everything needed for apiserver to deal with external services
 type Config struct {
 	KubernetesOptions     *k8s.KubernetesOptions  `json:"kubernetes,omitempty" yaml:"kubernetes,omitempty" mapstructure:"kubernetes"`
-	LdapOptions           *ldap.Options           `json:"-,omitempty" yaml:"ldap,omitempty" mapstructure:"ldap"`
 	RedisOptions          *cache.Options          `json:"redis,omitempty" yaml:"redis,omitempty" mapstructure:"redis"`
-	MonitoringOptions     *prometheus.Options     `json:"monitoring,omitempty" yaml:"monitoring,omitempty" mapstructure:"monitoring"`
 	LoggingOptions        *logging.Options        `json:"logging,omitempty" yaml:"logging,omitempty" mapstructure:"logging"`
 	AuthenticationOptions *authentication.Options `json:"authentication,omitempty" yaml:"authentication,omitempty" mapstructure:"authentication"`
 	AuthorizationOptions  *authorization.Options  `json:"authorization,omitempty" yaml:"authorization,omitempty" mapstructure:"authorization"`
 	MultiClusterOptions   *multicluster.Options   `json:"multicluster,omitempty" yaml:"multicluster,omitempty" mapstructure:"multicluster"`
-	NotificationOptions   *notification.Options   `json:"notification,omitempty" yaml:"notification,omitempty" mapstructure:"notification"`
-	MeteringOptions       *metering.Options       `json:"metering,omitempty" yaml:"metering,omitempty" mapstructure:"metering"`
 }
 
 // newConfig creates a default non-empty Config
 func New() *Config {
 	return &Config{
 		KubernetesOptions:     k8s.NewKubernetesOptions(),
-		LdapOptions:           ldap.NewOptions(),
 		RedisOptions:          cache.NewRedisOptions(),
-		MonitoringOptions:     prometheus.NewPrometheusOptions(),
 		LoggingOptions:        logging.NewLoggingOptions(),
 		AuthenticationOptions: authentication.NewOptions(),
 		AuthorizationOptions:  authorization.NewOptions(),
 		MultiClusterOptions:   multicluster.NewOptions(),
-		MeteringOptions:       metering.NewMeteringOptions(),
 	}
 }
 
@@ -211,20 +200,8 @@ func (conf *Config) stripEmptyOptions() {
 		conf.RedisOptions = nil
 	}
 
-	if conf.MonitoringOptions != nil && conf.MonitoringOptions.Endpoint == "" {
-		conf.MonitoringOptions = nil
-	}
-
-	if conf.LdapOptions != nil && conf.LdapOptions.Host == "" {
-		conf.LdapOptions = nil
-	}
-
 	if conf.LoggingOptions != nil && conf.LoggingOptions.Host == "" {
 		conf.LoggingOptions = nil
-	}
-
-	if conf.NotificationOptions != nil && conf.NotificationOptions.Endpoint == "" {
-		conf.NotificationOptions = nil
 	}
 
 	if conf.MultiClusterOptions != nil && !conf.MultiClusterOptions.Enable {

@@ -20,7 +20,6 @@ import (
 	"errors"
 	"kube-aggregation/pkg/models/resources/v1alpha3/persistentvolume"
 
-	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	monitoringdashboardv1alpha2 "kubesphere.io/monitoring-dashboard/api/v1alpha2"
@@ -30,10 +29,7 @@ import (
 	"kube-aggregation/pkg/apiserver/query"
 	"kube-aggregation/pkg/informers"
 	"kube-aggregation/pkg/models/resources/v1alpha3"
-	"kube-aggregation/pkg/models/resources/v1alpha3/application"
 	"kube-aggregation/pkg/models/resources/v1alpha3/clusterdashboard"
-	"kube-aggregation/pkg/models/resources/v1alpha3/clusterrole"
-	"kube-aggregation/pkg/models/resources/v1alpha3/clusterrolebinding"
 	"kube-aggregation/pkg/models/resources/v1alpha3/configmap"
 	"kube-aggregation/pkg/models/resources/v1alpha3/daemonset"
 	"kube-aggregation/pkg/models/resources/v1alpha3/dashboard"
@@ -44,13 +40,10 @@ import (
 	"kube-aggregation/pkg/models/resources/v1alpha3/networkpolicy"
 	"kube-aggregation/pkg/models/resources/v1alpha3/node"
 	"kube-aggregation/pkg/models/resources/v1alpha3/pod"
-	"kube-aggregation/pkg/models/resources/v1alpha3/role"
-	"kube-aggregation/pkg/models/resources/v1alpha3/rolebinding"
 	"kube-aggregation/pkg/models/resources/v1alpha3/secret"
 	"kube-aggregation/pkg/models/resources/v1alpha3/service"
 	"kube-aggregation/pkg/models/resources/v1alpha3/serviceaccount"
 	"kube-aggregation/pkg/models/resources/v1alpha3/statefulset"
-	iamv1alpha2 "kubesphere.io/api/iam/v1alpha2"
 )
 
 var ErrResourceNotSupported = errors.New("resource is not supported")
@@ -75,16 +68,11 @@ func NewResourceGetter(factory informers.InformerFactory, cache cache.Cache) *Re
 	namespacedResourceGetters[schema.GroupVersionResource{Group: "networking.k8s.io", Version: "v1", Resource: "ingresses"}] = ingress.New(factory.KubernetesSharedInformerFactory())
 	namespacedResourceGetters[schema.GroupVersionResource{Group: "networking.k8s.io", Version: "v1", Resource: "networkpolicies"}] = networkpolicy.New(factory.KubernetesSharedInformerFactory())
 	namespacedResourceGetters[schema.GroupVersionResource{Group: "batch", Version: "v1", Resource: "jobs"}] = job.New(factory.KubernetesSharedInformerFactory())
-	namespacedResourceGetters[schema.GroupVersionResource{Group: "app.k8s.io", Version: "v1beta1", Resource: "applications"}] = application.New(cache)
 	clusterResourceGetters[schema.GroupVersionResource{Group: "", Version: "v1", Resource: "persistentvolumes"}] = persistentvolume.New(factory.KubernetesSharedInformerFactory())
-	namespacedResourceGetters[rbacv1.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcesPluralRoleBinding)] = rolebinding.New(factory.KubernetesSharedInformerFactory())
-	namespacedResourceGetters[rbacv1.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcesPluralRole)] = role.New(factory.KubernetesSharedInformerFactory())
 	clusterResourceGetters[schema.GroupVersionResource{Group: "", Version: "v1", Resource: "nodes"}] = node.New(factory.KubernetesSharedInformerFactory())
 	clusterResourceGetters[schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}] = namespace.New(factory.KubernetesSharedInformerFactory())
 
 	// kubesphere resources
-	clusterResourceGetters[rbacv1.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcesPluralClusterRole)] = clusterrole.New(factory.KubernetesSharedInformerFactory())
-	clusterResourceGetters[rbacv1.SchemeGroupVersion.WithResource(iamv1alpha2.ResourcesPluralClusterRoleBinding)] = clusterrolebinding.New(factory.KubernetesSharedInformerFactory())
 	clusterResourceGetters[monitoringdashboardv1alpha2.GroupVersion.WithResource("clusterdashboards")] = clusterdashboard.New(cache)
 
 	// federated resources

@@ -22,35 +22,24 @@ import (
 	"context"
 	"net/http"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	kubesphere "kube-aggregation/pkg/client/clientset/versioned"
 
 	"kube-aggregation/pkg/apiserver/authentication"
 
-	"k8s.io/apimachinery/pkg/api/errors"
 	authuser "k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/klog"
-	iamv1alpha2 "kubesphere.io/api/iam/v1alpha2"
-
-	"kube-aggregation/pkg/apiserver/authentication/identityprovider"
-	"kube-aggregation/pkg/apiserver/authentication/oauth"
-	iamv1alpha2listers "kube-aggregation/pkg/client/listers/iam/v1alpha2"
 )
 
 type oauthAuthenticator struct {
-	ksClient   kubesphere.Interface
-	userGetter *userGetter
-	options    *authentication.Options
+	ksClient kubesphere.Interface
+	options  *authentication.Options
 }
 
 func NewOAuthAuthenticator(ksClient kubesphere.Interface,
-	userLister iamv1alpha2listers.UserLister,
 	options *authentication.Options) OAuthAuthenticator {
 	authenticator := &oauthAuthenticator{
-		ksClient:   ksClient,
-		userGetter: &userGetter{userLister: userLister},
-		options:    options,
+		ksClient: ksClient,
+		options:  options,
 	}
 	return authenticator
 }
@@ -62,41 +51,6 @@ func (o *oauthAuthenticator) Authenticate(_ context.Context, provider string, re
 		klog.Error(err)
 		return nil, "", err
 	}
-	oauthIdentityProvider, err := identityprovider.GetOAuthProvider(providerOptions.Name)
-	if err != nil {
-		klog.Error(err)
-		return nil, "", err
-	}
-	authenticated, err := oauthIdentityProvider.IdentityExchangeCallback(req)
-	if err != nil {
-		klog.Error(err)
-		return nil, "", err
-	}
 
-	user, err := o.userGetter.findMappedUser(providerOptions.Name, authenticated.GetUserID())
-	if user == nil && providerOptions.MappingMethod == oauth.MappingMethodLookup {
-		klog.Error(err)
-		return nil, "", err
-	}
-
-	// the user will automatically create and mapping when login successful.
-	if user == nil && providerOptions.MappingMethod == oauth.MappingMethodAuto {
-		if !providerOptions.DisableLoginConfirmation {
-			return preRegistrationUser(providerOptions.Name, authenticated), providerOptions.Name, nil
-		}
-		user, err = o.ksClient.IamV1alpha2().Users().Create(context.Background(), mappedUser(providerOptions.Name, authenticated), metav1.CreateOptions{})
-		if err != nil {
-			return nil, providerOptions.Name, err
-		}
-	}
-
-	if user != nil {
-		if user.Status.State == iamv1alpha2.UserDisabled {
-			// state not active
-			return nil, "", AccountIsNotActiveError
-		}
-		return &authuser.DefaultInfo{Name: user.GetName()}, providerOptions.Name, nil
-	}
-
-	return nil, "", errors.NewNotFound(iamv1alpha2.Resource("user"), authenticated.GetUsername())
+	return &authuser.DefaultInfo{Name: "admin"}, providerOptions.Name, nil
 }

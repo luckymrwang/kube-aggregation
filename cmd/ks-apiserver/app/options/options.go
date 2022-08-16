@@ -40,7 +40,6 @@ import (
 	"strings"
 
 	"kube-aggregation/pkg/simple/client/k8s"
-	"kube-aggregation/pkg/simple/client/monitoring/metricsserver"
 )
 
 type ServerRunOptions struct {
@@ -74,7 +73,6 @@ func (s *ServerRunOptions) Flags() (fss cliflag.NamedFlagSets) {
 	s.AuthenticationOptions.AddFlags(fss.FlagSet("authentication"), s.AuthenticationOptions)
 	s.AuthorizationOptions.AddFlags(fss.FlagSet("authorization"), s.AuthorizationOptions)
 	s.RedisOptions.AddFlags(fss.FlagSet("redis"), s.RedisOptions)
-	s.MonitoringOptions.AddFlags(fss.FlagSet("monitoring"), s.MonitoringOptions)
 	s.LoggingOptions.AddFlags(fss.FlagSet("logging"), s.LoggingOptions)
 	s.MultiClusterOptions.AddFlags(fss.FlagSet("multicluster"), s.MultiClusterOptions)
 
@@ -106,18 +104,6 @@ func (s *ServerRunOptions) NewAPIServer(stopCh <-chan struct{}) (*apiserver.APIS
 	informerFactory := informers.NewInformerFactories(kubernetesClient.Kubernetes(), kubernetesClient.KubeSphere(),
 		kubernetesClient.Prometheus())
 	apiServer.InformerFactory = informerFactory
-
-	//if s.MonitoringOptions == nil || len(s.MonitoringOptions.Endpoint) == 0 {
-	//	return nil, fmt.Errorf("monitoring service address in configuration MUST not be empty, please check configmap/kubesphere-config in kubesphere-system namespace")
-	//} else {
-	//	monitoringClient, err := prometheus.NewPrometheus(s.MonitoringOptions)
-	//	if err != nil {
-	//		return nil, fmt.Errorf("failed to connect to prometheus, please check prometheus status, error: %v", err)
-	//	}
-	//	apiServer.MonitoringClient = monitoringClient
-	//}
-
-	apiServer.MetricsClient = metricsserver.NewMetricsClient(kubernetesClient.Kubernetes(), s.KubernetesOptions)
 
 	var cacheClient cache.Interface
 	if s.RedisOptions != nil && len(s.RedisOptions.Host) != 0 {

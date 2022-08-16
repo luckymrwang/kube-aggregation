@@ -20,24 +20,16 @@ package auth
 
 import (
 	"context"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	kubesphere "kube-aggregation/pkg/client/clientset/versioned"
 
 	"kube-aggregation/pkg/apiserver/authentication"
 
 	"golang.org/x/crypto/bcrypt"
-	"k8s.io/apimachinery/pkg/api/errors"
 	authuser "k8s.io/apiserver/pkg/authentication/user"
-	"k8s.io/klog"
-	"kube-aggregation/pkg/apiserver/authentication/identityprovider"
-	"kube-aggregation/pkg/apiserver/authentication/oauth"
-	"kube-aggregation/pkg/constants"
 )
 
 type passwordAuthenticator struct {
 	ksClient    kubesphere.Interface
-	userGetter  *userGetter
 	authOptions *authentication.Options
 }
 
@@ -54,45 +46,6 @@ func (p *passwordAuthenticator) Authenticate(_ context.Context, username, passwo
 	// empty username or password are not allowed
 	if username == "" || password == "" {
 		return nil, "", IncorrectPasswordError
-	}
-	// generic identity provider has higher priority
-	for _, providerOptions := range p.authOptions.OAuthOptions.IdentityProviders {
-		// the admin account in kubesphere has the highest priority
-		if username == constants.AdminUserName {
-			break
-		}
-		if genericProvider, _ := identityprovider.GetGenericProvider(providerOptions.Name); genericProvider != nil {
-			authenticated, err := genericProvider.Authenticate(username, password)
-			if err != nil {
-				if errors.IsUnauthorized(err) {
-					continue
-				}
-				return nil, providerOptions.Name, err
-			}
-			linkedAccount, err := p.userGetter.findMappedUser(providerOptions.Name, authenticated.GetUserID())
-			if err != nil && !errors.IsNotFound(err) {
-				klog.Error(err)
-				return nil, providerOptions.Name, err
-			}
-			// using this method requires you to manually provision users.
-			if providerOptions.MappingMethod == oauth.MappingMethodLookup && linkedAccount == nil {
-				continue
-			}
-			// the user will automatically create and mapping when login successful.
-			if linkedAccount == nil && providerOptions.MappingMethod == oauth.MappingMethodAuto {
-				if !providerOptions.DisableLoginConfirmation {
-					return preRegistrationUser(providerOptions.Name, authenticated), providerOptions.Name, nil
-				}
-
-				linkedAccount, err = p.ksClient.IamV1alpha2().Users().Create(context.Background(), mappedUser(providerOptions.Name, authenticated), metav1.CreateOptions{})
-				if err != nil {
-					return nil, providerOptions.Name, err
-				}
-			}
-			if linkedAccount != nil {
-				return &authuser.DefaultInfo{Name: linkedAccount.GetName()}, providerOptions.Name, nil
-			}
-		}
 	}
 
 	// if the password is not empty, means that the password has been reset, even if the user was mapping from IDP

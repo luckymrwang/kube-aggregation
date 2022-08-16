@@ -24,12 +24,6 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"kube-aggregation/pkg/apiserver/authentication/identityprovider"
-	_ "kube-aggregation/pkg/apiserver/authentication/identityprovider/aliyunidaas"
-	_ "kube-aggregation/pkg/apiserver/authentication/identityprovider/cas"
-	_ "kube-aggregation/pkg/apiserver/authentication/identityprovider/github"
-	_ "kube-aggregation/pkg/apiserver/authentication/identityprovider/ldap"
-	_ "kube-aggregation/pkg/apiserver/authentication/identityprovider/oidc"
 	"kube-aggregation/pkg/apiserver/authentication/oauth"
 )
 
@@ -83,9 +77,6 @@ func (options *Options) Validate() []error {
 	}
 	if options.AuthenticateRateLimiterMaxTries > options.LoginHistoryMaximumEntries {
 		errs = append(errs, errors.New("authenticateRateLimiterMaxTries MUST not be greater than loginHistoryMaximumEntries"))
-	}
-	if err := identityprovider.SetupWithOptions(options.OAuthOptions.IdentityProviders); err != nil {
-		errs = append(errs, err)
 	}
 	return errs
 }

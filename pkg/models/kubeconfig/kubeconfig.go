@@ -39,11 +39,6 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	certutil "k8s.io/client-go/util/cert"
 	"k8s.io/klog"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	iamv1alpha2 "kubesphere.io/api/iam/v1alpha2"
-
-	"kube-aggregation/pkg/client/clientset/versioned/scheme"
 	"kube-aggregation/pkg/constants"
 	"kube-aggregation/pkg/utils/pkiutil"
 )
@@ -63,7 +58,7 @@ const (
 
 type Interface interface {
 	GetKubeConfig(username string) (string, error)
-	CreateKubeConfig(user *iamv1alpha2.User) error
+	CreateKubeConfig(user string) error
 	UpdateKubeconfig(username string, csr *certificatesv1.CertificateSigningRequest) error
 }
 
@@ -83,11 +78,11 @@ func NewReadOnlyOperator(configMapLister corev1listers.ConfigMapLister, masterUR
 }
 
 // CreateKubeConfig Create kubeconfig configmap in KubeSphereControlNamespace for the specified user
-func (o *operator) CreateKubeConfig(user *iamv1alpha2.User) error {
-	configName := fmt.Sprintf(kubeconfigNameFormat, user.Name)
+func (o *operator) CreateKubeConfig(user string) error {
+	configName := fmt.Sprintf(kubeconfigNameFormat, user)
 	cm, err := o.configMapLister.ConfigMaps(constants.KubeSphereControlNamespace).Get(configName)
 	// already exist and cert will not expire in 3 days
-	if err == nil && !isExpired(cm, user.Name) {
+	if err == nil && !isExpired(cm, user) {
 		return nil
 	}
 
@@ -109,12 +104,12 @@ func (o *operator) CreateKubeConfig(user *iamv1alpha2.User) error {
 		}
 	}
 
-	if err = o.createCSR(user.Name); err != nil {
+	if err = o.createCSR(user); err != nil {
 		klog.Errorln(err)
 		return err
 	}
 
-	currentContext := fmt.Sprintf("%s@%s", user.Name, defaultClusterName)
+	currentContext := fmt.Sprintf("%s@%s", user, defaultClusterName)
 	config := clientcmdapi.Config{
 		Kind:        configMapKind,
 		APIVersion:  configMapAPIVersion,
@@ -126,7 +121,7 @@ func (o *operator) CreateKubeConfig(user *iamv1alpha2.User) error {
 		}},
 		Contexts: map[string]*clientcmdapi.Context{currentContext: {
 			Cluster:   defaultClusterName,
-			AuthInfo:  user.Name,
+			AuthInfo:  user,
 			Namespace: defaultNamespace,
 		}},
 		CurrentContext: currentContext,
@@ -156,14 +151,9 @@ func (o *operator) CreateKubeConfig(user *iamv1alpha2.User) error {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   configName,
-			Labels: map[string]string{constants.UsernameLabelKey: user.Name},
+			Labels: map[string]string{constants.UsernameLabelKey: user},
 		},
 		Data: map[string]string{kubeconfigFileName: string(kubeconfig)},
-	}
-
-	if err = controllerutil.SetControllerReference(user, cm, scheme.Scheme); err != nil {
-		klog.Errorln(err)
-		return err
 	}
 
 	if _, err = o.k8sClient.CoreV1().ConfigMaps(constants.KubeSphereControlNamespace).Create(context.Background(), cm, metav1.CreateOptions{}); err != nil {
@@ -293,7 +283,7 @@ func applyCert(cm *corev1.ConfigMap, csr *certificatesv1.CertificateSigningReque
 		return cm
 	}
 
-	username := getControlledUsername(cm)
+	username := "admin"
 	privateKey := csr.Annotations[privateKeyAnnotation]
 	clientCert := csr.Status.Certificate
 	kubeconfig.AuthInfos = map[string]*clientcmdapi.AuthInfo{
@@ -311,15 +301,6 @@ func applyCert(cm *corev1.ConfigMap, csr *certificatesv1.CertificateSigningReque
 
 	cm.Data[kubeconfigFileName] = string(data)
 	return cm
-}
-
-func getControlledUsername(cm *corev1.ConfigMap) string {
-	for _, ownerReference := range cm.OwnerReferences {
-		if ownerReference.Kind == iamv1alpha2.ResourceKindUser {
-			return ownerReference.Name
-		}
-	}
-	return ""
 }
 
 // isExpired returns whether the client certificate in kubeconfig is expired

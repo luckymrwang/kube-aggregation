@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"net/http"
 	rt "runtime"
-	"strconv"
 	"sync"
 	"time"
 
@@ -39,7 +38,6 @@ import (
 	"k8s.io/client-go/util/retry"
 	"k8s.io/klog"
 	clusterv1alpha1 "kubesphere.io/api/cluster/v1alpha1"
-	iamv1alpha2 "kubesphere.io/api/iam/v1alpha2"
 	runtimecache "sigs.k8s.io/controller-runtime/pkg/cache"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -59,17 +57,14 @@ import (
 	"kube-aggregation/pkg/informers"
 	configv1alpha2 "kube-aggregation/pkg/kapis/config/v1alpha2"
 	"kube-aggregation/pkg/kapis/crd"
-	meteringv1alpha1 "kube-aggregation/pkg/kapis/metering/v1alpha1"
 	resourcesv1alpha2 "kube-aggregation/pkg/kapis/resources/v1alpha2"
 	resourcev1alpha3 "kube-aggregation/pkg/kapis/resources/v1alpha3"
 	"kube-aggregation/pkg/kapis/version"
 	"kube-aggregation/pkg/models/auth"
 	"kube-aggregation/pkg/simple/client/cache"
 	"kube-aggregation/pkg/simple/client/k8s"
-	"kube-aggregation/pkg/simple/client/monitoring"
 	"kube-aggregation/pkg/utils/clusterclient"
 	"kube-aggregation/pkg/utils/iputil"
-	"kube-aggregation/pkg/utils/metrics"
 )
 
 var initMetrics sync.Once
@@ -95,11 +90,6 @@ type APIServer struct {
 	// cache is used for short lived objects, like session
 	CacheClient cache.Interface
 
-	// monitoring client set
-	MonitoringClient monitoring.Interface
-
-	MetricsClient monitoring.Interface
-
 	// controller-runtime cache
 	RuntimeCache runtimecache.Cache
 
@@ -121,9 +111,6 @@ func (s *APIServer) PrepareRun(stopCh <-chan struct{}) error {
 	})
 
 	s.installKubeSphereAPIs(stopCh)
-	//s.installCRDAPIs()
-	s.installMetricsAPI()
-	s.container.Filter(monitorRequest)
 
 	for _, ws := range s.container.RegisteredWebServices() {
 		klog.V(2).Infof("%s", ws.RootPath())
@@ -136,28 +123,11 @@ func (s *APIServer) PrepareRun(stopCh <-chan struct{}) error {
 	return nil
 }
 
-func monitorRequest(r *restful.Request, response *restful.Response, chain *restful.FilterChain) {
-	start := time.Now()
-	chain.ProcessFilter(r, response)
-	reqInfo, exists := request.RequestInfoFrom(r.Request.Context())
-	if exists && reqInfo.APIGroup != "" {
-		RequestCounter.WithLabelValues(reqInfo.Verb, reqInfo.APIGroup, reqInfo.APIVersion, reqInfo.Resource, strconv.Itoa(response.StatusCode())).Inc()
-		elapsedSeconds := time.Now().Sub(start).Seconds()
-		RequestLatencies.WithLabelValues(reqInfo.Verb, reqInfo.APIGroup, reqInfo.APIVersion, reqInfo.Resource).Observe(elapsedSeconds)
-	}
-}
-
-func (s *APIServer) installMetricsAPI() {
-	initMetrics.Do(registerMetrics)
-	metrics.Defaults.Install(s.container)
-}
-
 // Installation happens before all informers start to cache objects, so
 //   any attempt to list objects using listers will get empty results.
 func (s *APIServer) installKubeSphereAPIs(stopCh <-chan struct{}) {
 	urlruntime.Must(configv1alpha2.AddToContainer(s.container, s.Config))
 	urlruntime.Must(resourcev1alpha3.AddToContainer(s.container, s.InformerFactory, s.RuntimeCache))
-	urlruntime.Must(meteringv1alpha1.AddToContainer(s.container, s.KubernetesClient.Kubernetes(), s.MonitoringClient, s.InformerFactory, s.RuntimeCache, s.Config.MeteringOptions, s.RuntimeClient))
 	urlruntime.Must(resourcesv1alpha2.AddToContainer(s.container, s.KubernetesClient.Kubernetes(), s.InformerFactory,
 		s.KubernetesClient.Master()))
 
@@ -202,9 +172,6 @@ func (s *APIServer) buildHandlerChain(stopCh <-chan struct{}) {
 		APIPrefixes:          sets.NewString("api", "apis", "kapis", "kapi"),
 		GrouplessAPIPrefixes: sets.NewString("api", "kapi"),
 		GlobalResources: []schema.GroupResource{
-			iamv1alpha2.Resource(iamv1alpha2.ResourcesPluralUser),
-			iamv1alpha2.Resource(iamv1alpha2.ResourcesPluralGlobalRole),
-			iamv1alpha2.Resource(iamv1alpha2.ResourcesPluralGlobalRoleBinding),
 			clusterv1alpha1.Resource(clusterv1alpha1.ResourcesPluralCluster),
 			resourcev1alpha3.Resource(clusterv1alpha1.ResourcesPluralCluster),
 		},

@@ -41,8 +41,6 @@ const (
 	CategoryIdLabelKey         = "application.kubesphere.io/app-category-id"
 	CreatorAnnotationKey       = "kubesphere.io/creator"
 	UsernameLabelKey           = "kubesphere.io/username"
-	DevOpsProjectLabelKey      = "kubesphere.io/devopsproject"
-	KubefedManagedLabel        = "kubefed.io/managed"
 
 	UserNameHeader = "X-Token-Username"
 

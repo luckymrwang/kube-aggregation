@@ -20,8 +20,6 @@ import (
 	"github.com/emicklei/go-restful"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"kube-aggregation/pkg/simple/client/gpu"
-
 	kubesphereconfig "kube-aggregation/pkg/apiserver/config"
 	"kube-aggregation/pkg/apiserver/runtime"
 )
@@ -45,13 +43,6 @@ func AddToContainer(c *restful.Container, config *kubesphereconfig.Config) error
 		Doc("Information about the server configuration").
 		To(func(request *restful.Request, response *restful.Response) {
 			response.WriteAsJson(config.ToMap())
-		}))
-
-	webservice.Route(webservice.GET("/configs/gpu/kinds").
-		Doc("Get all supported GPU kinds.").
-		To(func(request *restful.Request, response *restful.Response) {
-			var kinds []gpu.GPUKind
-			response.WriteAsJson(kinds)
 		}))
 
 	c.Add(webservice)

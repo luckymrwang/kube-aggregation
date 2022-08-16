@@ -27,8 +27,6 @@ import (
 	clientset "kube-aggregation/pkg/client/clientset/versioned"
 	clusterv1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/cluster/v1alpha1"
 	fakeclusterv1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/cluster/v1alpha1/fake"
-	iamv1alpha2 "kube-aggregation/pkg/client/clientset/versioned/typed/iam/v1alpha2"
-	fakeiamv1alpha2 "kube-aggregation/pkg/client/clientset/versioned/typed/iam/v1alpha2/fake"
 	storagev1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/storage/v1alpha1"
 	fakestoragev1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/storage/v1alpha1/fake"
 )
@@ -83,11 +81,6 @@ var _ clientset.Interface = &Clientset{}
 // ClusterV1alpha1 retrieves the ClusterV1alpha1Client
 func (c *Clientset) ClusterV1alpha1() clusterv1alpha1.ClusterV1alpha1Interface {
 	return &fakeclusterv1alpha1.FakeClusterV1alpha1{Fake: &c.Fake}
-}
-
-// IamV1alpha2 retrieves the IamV1alpha2Client
-func (c *Clientset) IamV1alpha2() iamv1alpha2.IamV1alpha2Interface {
-	return &fakeiamv1alpha2.FakeIamV1alpha2{Fake: &c.Fake}
 }
 
 // StorageV1alpha1 retrieves the StorageV1alpha1Client
