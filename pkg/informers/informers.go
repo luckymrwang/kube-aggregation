@@ -20,13 +20,10 @@ import (
 	"reflect"
 	"time"
 
-	snapshotclient "github.com/kubernetes-csi/external-snapshotter/client/v4/clientset/versioned"
 	snapshotinformer "github.com/kubernetes-csi/external-snapshotter/client/v4/informers/externalversions"
 	prominformers "github.com/prometheus-operator/prometheus-operator/pkg/client/informers/externalversions"
 	promresourcesclient "github.com/prometheus-operator/prometheus-operator/pkg/client/versioned"
-	istioclient "istio.io/client-go/pkg/clientset/versioned"
 	istioinformers "istio.io/client-go/pkg/informers/externalversions"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apiextensionsinformers "k8s.io/apiextensions-apiserver/pkg/client/informers/externalversions"
 	k8sinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -66,8 +63,7 @@ type informerFactories struct {
 	prometheusInformerFactory    prominformers.SharedInformerFactory
 }
 
-func NewInformerFactories(client kubernetes.Interface, ksClient versioned.Interface, istioClient istioclient.Interface,
-	snapshotClient snapshotclient.Interface, apiextensionsClient apiextensionsclient.Interface,
+func NewInformerFactories(client kubernetes.Interface, ksClient versioned.Interface,
 	prometheusClient promresourcesclient.Interface) InformerFactory {
 	factory := &informerFactories{}
 
@@ -77,18 +73,6 @@ func NewInformerFactories(client kubernetes.Interface, ksClient versioned.Interf
 
 	if ksClient != nil {
 		factory.ksInformerFactory = ksinformers.NewSharedInformerFactory(ksClient, defaultResync)
-	}
-
-	if istioClient != nil {
-		factory.istioInformerFactory = istioinformers.NewSharedInformerFactory(istioClient, defaultResync)
-	}
-
-	if snapshotClient != nil {
-		factory.snapshotInformerFactory = snapshotinformer.NewSharedInformerFactory(snapshotClient, defaultResync)
-	}
-
-	if apiextensionsClient != nil {
-		factory.apiextensionsInformerFactory = apiextensionsinformers.NewSharedInformerFactory(apiextensionsClient, defaultResync)
 	}
 
 	if prometheusClient != nil {

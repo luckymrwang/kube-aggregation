@@ -75,10 +75,10 @@ var (
 
 const (
 	// DefaultConfigurationName is the default name of configuration
-	defaultConfigurationName = "kubesphere"
+	defaultConfigurationName = "kubeaggregation"
 
 	// DefaultConfigurationPath the default location of the configuration file
-	defaultConfigurationPath = "/Users/sino/.kube/kubesphere"
+	defaultConfigurationPath = "/Users/sino/.kube/kubeaggregation"
 )
 
 type config struct {

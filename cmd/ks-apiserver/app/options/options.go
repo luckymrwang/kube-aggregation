@@ -43,7 +43,6 @@ import (
 
 	"kube-aggregation/pkg/simple/client/k8s"
 	"kube-aggregation/pkg/simple/client/monitoring/metricsserver"
-	"kube-aggregation/pkg/simple/client/monitoring/prometheus"
 )
 
 type ServerRunOptions struct {
@@ -107,18 +106,18 @@ func (s *ServerRunOptions) NewAPIServer(stopCh <-chan struct{}) (*apiserver.APIS
 	apiServer.KubernetesClient = kubernetesClient
 
 	informerFactory := informers.NewInformerFactories(kubernetesClient.Kubernetes(), kubernetesClient.KubeSphere(),
-		kubernetesClient.Istio(), kubernetesClient.Snapshot(), kubernetesClient.ApiExtensions(), kubernetesClient.Prometheus())
+		kubernetesClient.Prometheus())
 	apiServer.InformerFactory = informerFactory
 
-	if s.MonitoringOptions == nil || len(s.MonitoringOptions.Endpoint) == 0 {
-		return nil, fmt.Errorf("moinitoring service address in configuration MUST not be empty, please check configmap/kubesphere-config in kubesphere-system namespace")
-	} else {
-		monitoringClient, err := prometheus.NewPrometheus(s.MonitoringOptions)
-		if err != nil {
-			return nil, fmt.Errorf("failed to connect to prometheus, please check prometheus status, error: %v", err)
-		}
-		apiServer.MonitoringClient = monitoringClient
-	}
+	//if s.MonitoringOptions == nil || len(s.MonitoringOptions.Endpoint) == 0 {
+	//	return nil, fmt.Errorf("moinitoring service address in configuration MUST not be empty, please check configmap/kubesphere-config in kubesphere-system namespace")
+	//} else {
+	//	monitoringClient, err := prometheus.NewPrometheus(s.MonitoringOptions)
+	//	if err != nil {
+	//		return nil, fmt.Errorf("failed to connect to prometheus, please check prometheus status, error: %v", err)
+	//	}
+	//	apiServer.MonitoringClient = monitoringClient
+	//}
 
 	apiServer.MetricsClient = metricsserver.NewMetricsClient(kubernetesClient.Kubernetes(), s.KubernetesOptions)
 

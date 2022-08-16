@@ -26,57 +26,26 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"gopkg.in/yaml.v2"
 
-	networkv1alpha1 "kubesphere.io/api/network/v1alpha1"
-
 	"kube-aggregation/pkg/apiserver/authentication"
 	"kube-aggregation/pkg/apiserver/authentication/oauth"
 	"kube-aggregation/pkg/apiserver/authorization"
-	"kube-aggregation/pkg/models/terminal"
-	"kube-aggregation/pkg/simple/client/alerting"
-	"kube-aggregation/pkg/simple/client/auditing"
 	"kube-aggregation/pkg/simple/client/cache"
-	"kube-aggregation/pkg/simple/client/devops/jenkins"
-	"kube-aggregation/pkg/simple/client/edgeruntime"
-	"kube-aggregation/pkg/simple/client/events"
-	"kube-aggregation/pkg/simple/client/gateway"
-	"kube-aggregation/pkg/simple/client/gpu"
 	"kube-aggregation/pkg/simple/client/k8s"
-	"kube-aggregation/pkg/simple/client/kubeedge"
 	"kube-aggregation/pkg/simple/client/ldap"
 	"kube-aggregation/pkg/simple/client/logging"
 	"kube-aggregation/pkg/simple/client/metering"
 	"kube-aggregation/pkg/simple/client/monitoring/prometheus"
 	"kube-aggregation/pkg/simple/client/multicluster"
-	"kube-aggregation/pkg/simple/client/network"
 	"kube-aggregation/pkg/simple/client/notification"
-	"kube-aggregation/pkg/simple/client/openpitrix"
-	"kube-aggregation/pkg/simple/client/s3"
-	"kube-aggregation/pkg/simple/client/servicemesh"
-	"kube-aggregation/pkg/simple/client/sonarqube"
 )
 
 func newTestConfig() (*Config, error) {
 	var conf = &Config{
-		DevopsOptions: &jenkins.Options{
-			Host:           "http://ks-devops.kubesphere-devops-system.svc",
-			Username:       "jenkins",
-			Password:       "kubesphere",
-			MaxConnections: 10,
-		},
-		SonarQubeOptions: &sonarqube.Options{
-			Host:  "http://sonarqube.kubesphere-devops-system.svc",
-			Token: "ABCDEFG",
-		},
 		KubernetesOptions: &k8s.KubernetesOptions{
 			KubeConfig: "/Users/zry/.kube/config",
 			Master:     "https://127.0.0.1:6443",
 			QPS:        1e6,
 			Burst:      1e6,
-		},
-		ServiceMeshOptions: &servicemesh.Options{
-			IstioPilotHost:            "http://istio-pilot.istio-system.svc:9090",
-			JaegerQueryHost:           "http://jaeger-query.istio-system.svc:80",
-			ServicemeshPrometheusHost: "http://prometheus-k8s.kubesphere-monitoring-system.svc",
 		},
 		LdapOptions: &ldap.Options{
 			Host:            "http://openldap.kubesphere-system.svc",
@@ -94,40 +63,6 @@ func newTestConfig() (*Config, error) {
 			Password: "KUBESPHERE_REDIS_PASSWORD",
 			DB:       0,
 		},
-		S3Options: &s3.Options{
-			Endpoint:        "http://minio.openpitrix-system.svc",
-			Region:          "us-east-1",
-			DisableSSL:      false,
-			ForcePathStyle:  false,
-			AccessKeyID:     "ABCDEFGHIJKLMN",
-			SecretAccessKey: "OPQRSTUVWXYZ",
-			SessionToken:    "abcdefghijklmn",
-			Bucket:          "ssss",
-		},
-		OpenPitrixOptions: &openpitrix.Options{
-			S3Options: &s3.Options{
-				Endpoint:        "http://minio.openpitrix-system.svc",
-				Region:          "",
-				DisableSSL:      false,
-				ForcePathStyle:  false,
-				AccessKeyID:     "ABCDEFGHIJKLMN",
-				SecretAccessKey: "OPQRSTUVWXYZ",
-				SessionToken:    "abcdefghijklmn",
-				Bucket:          "app",
-			},
-			ReleaseControllerOptions: &openpitrix.ReleaseControllerOptions{
-				MaxConcurrent: 10,
-				WaitTime:      30 * time.Second,
-			},
-		},
-		NetworkOptions: &network.Options{
-			EnableNetworkPolicy: true,
-			NSNPOptions: network.NSNPOptions{
-				AllowedIngressNamespaces: []string{},
-			},
-			WeaveScopeHost: "weave-scope-app.weave",
-			IPPoolType:     networkv1alpha1.IPPoolTypeNone,
-		},
 		MonitoringOptions: &prometheus.Options{
 			Endpoint: "http://prometheus.kubesphere-monitoring-system.svc",
 		},
@@ -135,13 +70,6 @@ func newTestConfig() (*Config, error) {
 			Host:        "http://elasticsearch-logging.kubesphere-logging-system.svc:9200",
 			IndexPrefix: "elk",
 			Version:     "6",
-		},
-		AlertingOptions: &alerting.Options{
-			Endpoint: "http://alerting-client-server.kubesphere-alerting-system.svc:9200/api",
-
-			PrometheusEndpoint:       "http://prometheus-operated.kubesphere-monitoring-system.svc",
-			ThanosRulerEndpoint:      "http://thanos-ruler-operated.kubesphere-monitoring-system.svc",
-			ThanosRuleResourceLabels: "thanosruler=thanos-ruler,role=thanos-alerting-rules",
 		},
 		NotificationOptions: &notification.Options{
 			Endpoint: "http://notification.kubesphere-alerting-system.svc:9200",
@@ -169,35 +97,8 @@ func newTestConfig() (*Config, error) {
 			},
 		},
 		MultiClusterOptions: multicluster.NewOptions(),
-		EventsOptions: &events.Options{
-			Host:        "http://elasticsearch-logging-data.kubesphere-logging-system.svc:9200",
-			IndexPrefix: "ks-logstash-events",
-			Version:     "6",
-		},
-		AuditingOptions: &auditing.Options{
-			Host:        "http://elasticsearch-logging-data.kubesphere-logging-system.svc:9200",
-			IndexPrefix: "ks-logstash-auditing",
-			Version:     "6",
-		},
-		KubeEdgeOptions: &kubeedge.Options{
-			Endpoint: "http://edge-watcher.kubeedge.svc/api/",
-		},
-		EdgeRuntimeOptions: &edgeruntime.Options{
-			Endpoint: "http://edgeservice.kubeedge.svc/api/",
-		},
 		MeteringOptions: &metering.Options{
 			RetentionDay: "7d",
-		},
-		GatewayOptions: &gateway.Options{
-			WatchesPath: "/etc/kubesphere/watches.yaml",
-			Namespace:   "kubesphere-controls-system",
-		},
-		GPUOptions: &gpu.Options{
-			Kinds: []gpu.GPUKind{},
-		},
-		TerminalOptions: &terminal.Options{
-			Image:   "alpine:3.15",
-			Timeout: 600,
 		},
 	}
 	return conf, nil
@@ -252,54 +153,20 @@ func TestStripEmptyOptions(t *testing.T) {
 	var config Config
 
 	config.RedisOptions = &cache.Options{Host: ""}
-	config.DevopsOptions = &jenkins.Options{Host: ""}
 	config.MonitoringOptions = &prometheus.Options{Endpoint: ""}
-	config.SonarQubeOptions = &sonarqube.Options{Host: ""}
 	config.LdapOptions = &ldap.Options{Host: ""}
-	config.NetworkOptions = &network.Options{
-		EnableNetworkPolicy: false,
-		WeaveScopeHost:      "",
-		IPPoolType:          networkv1alpha1.IPPoolTypeNone,
-	}
-	config.ServiceMeshOptions = &servicemesh.Options{
-		IstioPilotHost:            "",
-		ServicemeshPrometheusHost: "",
-		JaegerQueryHost:           "",
-	}
-	config.S3Options = &s3.Options{
-		Endpoint: "",
-	}
-	config.AlertingOptions = &alerting.Options{
-		Endpoint:            "",
-		PrometheusEndpoint:  "",
-		ThanosRulerEndpoint: "",
-	}
 	config.LoggingOptions = &logging.Options{Host: ""}
 	config.NotificationOptions = &notification.Options{Endpoint: ""}
 	config.MultiClusterOptions = &multicluster.Options{Enable: false}
-	config.EventsOptions = &events.Options{Host: ""}
-	config.AuditingOptions = &auditing.Options{Host: ""}
-	config.KubeEdgeOptions = &kubeedge.Options{Endpoint: ""}
-	config.EdgeRuntimeOptions = &edgeruntime.Options{Endpoint: ""}
 
 	config.stripEmptyOptions()
 
 	if config.RedisOptions != nil ||
-		config.DevopsOptions != nil ||
 		config.MonitoringOptions != nil ||
-		config.SonarQubeOptions != nil ||
 		config.LdapOptions != nil ||
-		config.NetworkOptions != nil ||
-		config.ServiceMeshOptions != nil ||
-		config.S3Options != nil ||
-		config.AlertingOptions != nil ||
 		config.LoggingOptions != nil ||
 		config.NotificationOptions != nil ||
-		config.MultiClusterOptions != nil ||
-		config.EventsOptions != nil ||
-		config.AuditingOptions != nil ||
-		config.KubeEdgeOptions != nil ||
-		config.EdgeRuntimeOptions != nil {
+		config.MultiClusterOptions != nil {
 		t.Fatal("config stripEmptyOptions failed")
 	}
 }
