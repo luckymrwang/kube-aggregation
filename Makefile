@@ -82,9 +82,6 @@ deploy: manifests ;$(info $(M)...Begin to deploy.)  @ ## Deploy.
 	kubectl apply -f config/crds
 	kustomize build config/default | kubectl apply -f -
 
-mockgen: ;$(info $(M)...Begin to mockgen.)  @ ## Mockgen.
-	mockgen -package=openpitrix -source=pkg/simple/client/openpitrix/openpitrix.go -destination=pkg/simple/client/openpitrix/mock.go
-
 deepcopy: ;$(info $(M)...Begin to deepcopy.)  @ ## Deepcopy.
 	hack/generate_group.sh "deepcopy" kubesphere.io/api kubesphere.io/api ${GV} --output-base=staging/src/  -h "hack/boilerplate.go.txt"
 
@@ -114,17 +111,6 @@ helm-uninstall: ; $(info $(M)...Begin to helm-uninstall.)  @ ## Helm-uninstall.
 	- kubectl delete ns kubesphere-controls-system
 	helm uninstall ks-core -n kubesphere-system
 	kubectl delete -f https://raw.githubusercontent.com/kubesphere/ks-installer/master/roles/ks-core/prepare/files/ks-init/role-templates.yaml
-
-# Run tests
-ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
-test: vet test-env ;$(info $(M)...Begin to run tests.)  @ ## Run tests.
-	export KUBEBUILDER_ASSETS=$(shell pwd)/testbin/bin; go test ./pkg/... ./cmd/... -covermode=atomic -coverprofile=coverage.txt
-	cd staging/src/kubesphere.io/api ; GOFLAGS="" go test ./...
-	cd staging/src/kubesphere.io/client-go ; GOFLAGS="" go test ./...
-
-.PHONY: test-env
-test-env: ;$(info $(M)...Begin to setup test env) @ ## Download unit test libraries e.g. kube-apiserver etcd.
-	@hack/setup-kubebuilder-env.sh
 
 .PHONY: clean
 clean: ;$(info $(M)...Begin to clean.)  @ ## Clean.
