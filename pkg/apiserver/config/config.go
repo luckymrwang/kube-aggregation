@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The KubeSphere Authors.
+Copyright 2020 The KubeAggregation Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import (
 	"kube-aggregation/pkg/simple/client/multicluster"
 )
 
-// Package config saves configuration for running KubeSphere components
+// Package config saves configuration for running KubeAggregation components
 //
 // Config can be configured from command line flags and configuration file.
 // Command line flags hold higher priority than configuration file. But if
@@ -210,7 +210,7 @@ func (conf *Config) stripEmptyOptions() {
 	}
 }
 
-// GetFromConfigMap returns KubeSphere ruuning config by the given ConfigMap.
+// GetFromConfigMap returns KubeAggregation ruuning config by the given ConfigMap.
 func GetFromConfigMap(cm *corev1.ConfigMap) (*Config, error) {
 	c := &Config{}
 	value, ok := cm.Data[constants.KubeSphereConfigMapDataKey]

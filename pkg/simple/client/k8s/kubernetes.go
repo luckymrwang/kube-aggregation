@@ -1,5 +1,5 @@
 /*
-Copyright 2020 KubeSphere Authors
+Copyright 2020 KubeAggregation Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import (
 
 type Client interface {
 	Kubernetes() kubernetes.Interface
-	KubeSphere() kubesphere.Interface
+	KubeAggregation() kubesphere.Interface
 	Master() string
 	Config() *rest.Config
 }
@@ -114,7 +114,7 @@ func (k *kubernetesClient) Kubernetes() kubernetes.Interface {
 	return k.k8s
 }
 
-func (k *kubernetesClient) KubeSphere() kubesphere.Interface {
+func (k *kubernetesClient) KubeAggregation() kubesphere.Interface {
 	return k.ks
 }
 

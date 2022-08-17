@@ -1,5 +1,5 @@
 /*
-Copyright 2020 KubeSphere Authors
+Copyright 2020 KubeAggregation Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ func AddToContainer(container *restful.Container, k8sDiscovery discovery.Discove
 
 			response.WriteAsJson(ksVersion)
 		})).
-		Doc("KubeSphere version")
+		Doc("KubeAggregation version")
 
 	container.Add(webservice)
 

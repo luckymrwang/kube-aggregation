@@ -1,5 +1,5 @@
 /*
-Copyright 2020 KubeSphere Authors
+Copyright 2020 KubeAggregation Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ func (s *ServerRunOptions) NewAPIServer(stopCh <-chan struct{}) (*apiserver.APIS
 	}
 	apiServer.KubernetesClient = kubernetesClient
 
-	informerFactory := informers.NewInformerFactories(kubernetesClient.Kubernetes(), kubernetesClient.KubeSphere())
+	informerFactory := informers.NewInformerFactories(kubernetesClient.Kubernetes(), kubernetesClient.KubeAggregation())
 	apiServer.InformerFactory = informerFactory
 
 	var cacheClient cache.Interface

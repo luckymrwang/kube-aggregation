@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The KubeSphere Authors.
+Copyright 2019 The KubeAggregation Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -180,7 +180,7 @@ func (s *APIServer) buildHandlerChain(stopCh <-chan struct{}) {
 	// authenticators are unordered
 	authn := unionauth.New(anonymous.NewAuthenticator(),
 		basictoken.New(basic.NewBasicAuthenticator(auth.NewPasswordAuthenticator(
-			s.KubernetesClient.KubeSphere(),
+			s.KubernetesClient.KubeAggregation(),
 			s.Config.AuthenticationOptions))),
 		bearertoken.New(jwt.NewTokenAuthenticator(
 			auth.NewTokenOperator(s.CacheClient, s.Issuer, s.Config.AuthenticationOptions))))

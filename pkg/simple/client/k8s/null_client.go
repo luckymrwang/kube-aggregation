@@ -1,5 +1,5 @@
 /*
-Copyright 2020 KubeSphere Authors
+Copyright 2020 KubeAggregation Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ func (n nullClient) Kubernetes() kubernetes.Interface {
 	return nil
 }
 
-func (n nullClient) KubeSphere() kubesphere.Interface {
+func (n nullClient) KubeAggregation() kubesphere.Interface {
 	return nil
 }
 

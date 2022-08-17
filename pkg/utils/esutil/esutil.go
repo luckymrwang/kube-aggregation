@@ -1,5 +1,5 @@
 /*
-Copyright 2020 KubeSphere Authors
+Copyright 2020 KubeAggregation Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-// KubeSphere uses the layout `yyyy.MM.dd`.
+// KubeAggregation uses the layout `yyyy.MM.dd`.
 const layoutISO = "2006.01.02"
 
 // Always do calculation based on UTC.

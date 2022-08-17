@@ -1,5 +1,5 @@
 /*
-Copyright 2020 KubeSphere Authors
+Copyright 2020 KubeAggregation Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ func NewForConfigOrDie(config *rest.Config, options client.Options) client.Clien
 
 var _ client.Client = &genericClient{}
 
-// genericClient is a client.Client that reads and writes directly from/to an KubeSphere API server.  It lazily initializes
+// genericClient is a client.Client that reads and writes directly from/to an KubeAggregation API server.  It lazily initializes
 // new clients at the time they are used, and caches the client.
 type genericClient struct {
 	typedClient        typedClient

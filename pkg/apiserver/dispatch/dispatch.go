@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The KubeSphere Authors.
+Copyright 2020 The KubeAggregation Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -107,14 +107,14 @@ func (c *clusterDispatch) Dispatch(w http.ResponseWriter, req *http.Request, han
 		// The reason we need this is kube-apiserver doesn't behave like a standard proxy, it will strip
 		// authorization header of proxy requests. Use custom header to avoid stripping by kube-apiserver.
 		// https://github.com/kubernetes/kubernetes/issues/38775#issuecomment-277915961
-		// We first copy req.Header['Authorization'] to req.Header['X-KubeSphere-Authorization'] before sending
-		// designated cluster kube-apiserver, then copy req.Header['X-KubeSphere-Authorization'] to
+		// We first copy req.Header['Authorization'] to req.Header['X-KubeAggregation-Authorization'] before sending
+		// designated cluster kube-apiserver, then copy req.Header['X-KubeAggregation-Authorization'] to
 		// req.Header['Authorization'] before authentication.
 		req.Header.Set("X-KubeSphere-Authorization", req.Header.Get("Authorization"))
 
 		// If cluster kubeconfig using token authentication, transport will not override authorization header,
 		// this will cause requests reject by kube-apiserver since kubesphere authorization header is not
-		// acceptable. Delete this header is safe since we are using X-KubeSphere-Authorization.
+		// acceptable. Delete this header is safe since we are using X-KubeAggregation-Authorization.
 		// https://github.com/kubernetes/client-go/blob/master/transport/round_trippers.go#L285
 		req.Header.Del("Authorization")
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 KubeSphere Authors
+Copyright 2020 KubeAggregation Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 )
 
-// client is a client.Reader that reads directly from an KubeSphere API server.  It lazily initializes
+// client is a client.Reader that reads directly from an KubeAggregation API server.  It lazily initializes
 // new clients at the time they are used, and caches the client.
 // TODO(Roland): Paging and sorting parameter should be supported.
 type typedClient struct {

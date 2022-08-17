@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The KubeSphere Authors.
+Copyright 2019 The KubeAggregation Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ func NewAPIServerCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use: "ks-apiserver",
-		Long: `The KubeSphere API server validates and configures data for the API objects. 
+		Long: `The KubeAggregation API server validates and configures data for the API objects. 
 The API Server services REST operations and provides the frontend to the
 cluster's shared state through which all other components interact.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -87,7 +87,7 @@ cluster's shared state through which all other components interact.`,
 
 	versionCmd := &cobra.Command{
 		Use:   "version",
-		Short: "Print the version of KubeSphere ks-apiserver",
+		Short: "Print the version of KubeAggregation ks-apiserver",
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Println(version.Get())
 		},

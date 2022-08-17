@@ -1,5 +1,5 @@
 /*
-Copyright 2020 KubeSphere Authors
+Copyright 2020 KubeAggregation Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ func (n *FakeClient) Kubernetes() kubernetes.Interface {
 	return n.K8sClient
 }
 
-func (n *FakeClient) KubeSphere() kubesphere.Interface {
+func (n *FakeClient) KubeAggregation() kubesphere.Interface {
 	return n.KubeSphereClient
 }
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 KubeSphere Authors
+Copyright 2020 KubeAggregation Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ func (o *Options) Validate() []error {
 
 func (o *Options) AddFlags(fs *pflag.FlagSet, s *Options) {
 	fs.BoolVar(&o.Enable, "multiple-clusters", s.Enable, ""+
-		"This field instructs KubeSphere to enter multiple-cluster mode or not.")
+		"This field instructs KubeAggregation to enter multiple-cluster mode or not.")
 
 	fs.StringVar(&o.ProxyPublishService, "proxy-publish-service", s.ProxyPublishService, ""+
 		"Service name of tower. APIServer will use its ingress address as proxy publish address."+

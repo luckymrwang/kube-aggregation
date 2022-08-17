@@ -1,5 +1,5 @@
 /*
-Copyright 2020 KubeSphere Authors
+Copyright 2020 KubeAggregation Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ type Connection struct {
 	//   or kubesphere apiserver endpoint required
 	Type ConnectionType `json:"type,omitempty"`
 
-	// KubeSphere API Server endpoint. Example: http://10.10.0.11:8080
+	// KubeAggregation API Server endpoint. Example: http://10.10.0.11:8080
 	// Should provide this field explicitly if connection type is direct.
 	// Will be populated by ks-apiserver if connection type is proxy.
 	KubeSphereAPIEndpoint string `json:"kubesphereAPIEndpoint,omitempty"`

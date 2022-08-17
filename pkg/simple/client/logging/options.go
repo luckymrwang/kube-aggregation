@@ -1,5 +1,5 @@
 /*
-Copyright 2020 KubeSphere Authors
+Copyright 2020 KubeAggregation Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,14 +52,14 @@ func (s *Options) Validate() []error {
 
 func (s *Options) AddFlags(fs *pflag.FlagSet, c *Options) {
 	fs.StringVar(&s.Host, "logging-elasticsearch-host", c.Host, ""+
-		"Elasticsearch logging service host. KubeSphere is using elastic as log store, "+
-		"if this filed left blank, KubeSphere will use kubernetes builtin log API instead, and"+
+		"Elasticsearch logging service host. KubeAggregation is using elastic as log store, "+
+		"if this filed left blank, KubeAggregation will use kubernetes builtin log API instead, and"+
 		" the following elastic search options will be ignored.")
 
 	fs.BoolVar(&s.BasicAuth, "logging-elasticsearch-basicAuth", c.BasicAuth, ""+
-		"Elasticsearch logging service basic auth enabled. KubeSphere is using elastic as logging store, "+
-		"if it is set to true, KubeSphere will connect to ElasticSearch using provided username and password by "+
-		"logging-elasticsearch-username and logging-elasticsearch-username. Otherwise, KubeSphere will "+
+		"Elasticsearch logging service basic auth enabled. KubeAggregation is using elastic as logging store, "+
+		"if it is set to true, KubeAggregation will connect to ElasticSearch using provided username and password by "+
+		"logging-elasticsearch-username and logging-elasticsearch-username. Otherwise, KubeAggregation will "+
 		"anonymously access the Elasticsearch.")
 
 	fs.StringVar(&s.Username, "logging-elasticsearch-username", c.Username, ""+
@@ -71,7 +71,7 @@ func (s *Options) AddFlags(fs *pflag.FlagSet, c *Options) {
 		"set to true. ")
 
 	fs.StringVar(&s.IndexPrefix, "logging-index-prefix", c.IndexPrefix, ""+
-		"Index name prefix. KubeSphere will retrieve logs against indices matching the prefix.")
+		"Index name prefix. KubeAggregation will retrieve logs against indices matching the prefix.")
 
 	fs.StringVar(&s.Version, "logging-elasticsearch-version", c.Version, ""+
 		"Elasticsearch major version, e.g. 5/6/7, if left blank, will detect automatically."+

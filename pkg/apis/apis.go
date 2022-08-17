@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The KubeSphere Authors.
+Copyright 2019 The KubeAggregation Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package apis contains KubeSphere API groups.
+// Package apis contains KubeAggregation API groups.
 package apis
 
 import (

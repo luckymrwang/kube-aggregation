@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The KubeSphere Authors.
+Copyright 2020 The KubeAggregation Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import (
 
 func WithRequestInfo(handler http.Handler, resolver request.RequestInfoResolver) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		// KubeSphere supports kube-apiserver proxy requests in multicluster mode. But kube-apiserver
+		// KubeAggregation supports kube-apiserver proxy requests in multicluster mode. But kube-apiserver
 		// stripped all authorization headers. Use custom header to carry token to avoid losing authentication token.
 		// We may need a better way. See issue below.
 		// https://github.com/kubernetes/kubernetes/issues/38775#issuecomment-277915961
