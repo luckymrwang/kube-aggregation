@@ -41,8 +41,8 @@ spec:
         resources:
           {{- toYaml .Values.apiserver.resources | nindent 12 }}
         volumeMounts:
-        - mountPath: /etc/kubesphere/
-          name: kubesphere-config
+        - mountPath: /etc/kubeaggregation/
+          name: kubeaggregation-config
         - mountPath: /etc/localtime
           name: host-time
           readOnly: true
@@ -77,8 +77,8 @@ spec:
       volumes:
       - configMap:
           defaultMode: 420
-          name: kubesphere-config
-        name: kubesphere-config
+          name: kubeaggregation-config
+        name: kubeaggregation-config
       - hostPath:
           path: /etc/localtime
           type: ""
@@ -91,8 +91,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    kubernetes.io/created-by: kubesphere.io/ks-apiserver
   labels:
     app: ks-apiserver
     tier: backend

@@ -20,70 +20,29 @@ const (
 	APIVersion = "v1alpha1"
 
 	KubeSystemNamespace           = "kube-system"
-	OpenPitrixNamespace           = "openpitrix-system"
-	KubesphereDevOpsNamespace     = "kubesphere-devops-system"
-	IstioNamespace                = "istio-system"
 	KubeSphereMonitoringNamespace = "kubesphere-monitoring-system"
 	KubeSphereLoggingNamespace    = "kubesphere-logging-system"
 	KubeSphereNamespace           = "kubesphere-system"
-	KubeSphereControlNamespace    = "kubesphere-controls-system"
 	PorterNamespace               = "porter-system"
 	AdminUserName                 = "admin"
-	IngressControllerPrefix       = "kubesphere-router-"
-	KubeSphereConfigName          = "kubesphere-config"
 	KubeSphereConfigMapDataKey    = "kubesphere.yaml"
 
-	WorkspaceLabelKey          = "kubesphere.io/workspace"
-	NamespaceLabelKey          = "kubesphere.io/namespace"
-	DisplayNameAnnotationKey   = "kubesphere.io/alias-name"
-	ChartRepoIdLabelKey        = "application.kubesphere.io/repo-id"
-	ChartApplicationIdLabelKey = "application.kubesphere.io/app-id"
-	CategoryIdLabelKey         = "application.kubesphere.io/app-category-id"
-	CreatorAnnotationKey       = "kubesphere.io/creator"
-	UsernameLabelKey           = "kubesphere.io/username"
+	WorkspaceLabelKey        = "kubesphere.io/workspace"
+	NamespaceLabelKey        = "kubesphere.io/namespace"
+	DisplayNameAnnotationKey = "kubesphere.io/alias-name"
+	CreatorAnnotationKey     = "kubesphere.io/creator"
 
 	UserNameHeader = "X-Token-Username"
 
 	AuthenticationTag = "Authentication"
 	UserTag           = "User"
 
-	ToolboxTag  = "Toolbox"
-	RegistryTag = "Docker Registry"
-	GitTag      = "Git"
-	TerminalTag = "Terminal"
-
 	NamespaceResourcesTag = "Namespace Resources"
 	ClusterResourcesTag   = "Cluster Resources"
-	ComponentStatusTag    = "Component Status"
-
-	ClusterMetricsTag   = "Cluster Metrics"
-	NodeMetricsTag      = "Node Metrics"
-	NamespaceMetricsTag = "Namespace Metrics"
-	PodMetricsTag       = "Pod Metrics"
-	PVCMetricsTag       = "PVC Metrics"
-	IngressMetricsTag   = "Ingress Metrics"
-	ContainerMetricsTag = "Container Metrics"
-	WorkloadMetricsTag  = "Workload Metrics"
-	WorkspaceMetricsTag = "Workspace Metrics"
-	ComponentMetricsTag = "Component Metrics"
-	CustomMetricsTag    = "Custom Metrics"
 
 	LogQueryTag = "Log Query"
-
-	ClusterMetersTag   = "Cluster Meters"
-	NodeMetersTag      = "Node Meters"
-	WorkspaceMetersTag = "Workspace Meters"
-	NamespaceMetersTag = "Namespace Meters"
-	WorkloadMetersTag  = "Workload Meters"
-	PodMetersTag       = "Pod Meters"
-	ServiceMetricsTag  = "ServiceName Meters"
-
-	ApplicationName    = "app.kubernetes.io/name"
-	ApplicationVersion = "app.kubernetes.io/version"
-
-	DashboardTag = "Dashboard"
 )
 
 var (
-	SystemNamespaces = []string{KubeSphereNamespace, KubeSphereLoggingNamespace, KubeSphereMonitoringNamespace, OpenPitrixNamespace, KubeSystemNamespace, IstioNamespace, KubesphereDevOpsNamespace, PorterNamespace}
+	SystemNamespaces = []string{KubeSphereNamespace, KubeSphereLoggingNamespace, KubeSphereMonitoringNamespace, KubeSystemNamespace, PorterNamespace}
 )

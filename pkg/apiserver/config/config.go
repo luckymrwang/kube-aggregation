@@ -74,7 +74,8 @@ const (
 	defaultConfigurationName = "kubeaggregation"
 
 	// DefaultConfigurationPath the default location of the configuration file
-	defaultConfigurationPath = "/Users/sino/.kube/kubeaggregation"
+	defaultConfigurationPath = "/etc/kubeaggregation"
+	//defaultConfigurationPath = "/Users/sino/.kube/kubeaggregation"
 )
 
 type config struct {
@@ -120,7 +121,7 @@ func defaultConfig() *config {
 	viper.AddConfigPath(".")
 
 	// Load from Environment variables
-	viper.SetEnvPrefix("kubesphere")
+	viper.SetEnvPrefix("kubeaggregation")
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 

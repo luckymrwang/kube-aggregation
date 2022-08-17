@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kubesphere-config
+  name: kubeaggregation-config
 data:
-  kubesphere.yaml: |
+  kubeaggregation.yaml: |
     authentication:
       authenticateRateLimiterMaxTries: {{ .Values.config.authentication.authenticateRateLimiterMaxTries | default 10 }}
       authenticateRateLimiterDuration: {{ .Values.config.authentication.authenticationRateLimiterDuration | default "10m0s" }}
