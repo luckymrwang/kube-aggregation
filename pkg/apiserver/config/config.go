@@ -33,7 +33,6 @@ import (
 	"kube-aggregation/pkg/constants"
 	"kube-aggregation/pkg/simple/client/cache"
 	"kube-aggregation/pkg/simple/client/k8s"
-	"kube-aggregation/pkg/simple/client/logging"
 	"kube-aggregation/pkg/simple/client/multicluster"
 )
 
@@ -137,7 +136,6 @@ func defaultConfig() *config {
 type Config struct {
 	KubernetesOptions     *k8s.KubernetesOptions  `json:"kubernetes,omitempty" yaml:"kubernetes,omitempty" mapstructure:"kubernetes"`
 	RedisOptions          *cache.Options          `json:"redis,omitempty" yaml:"redis,omitempty" mapstructure:"redis"`
-	LoggingOptions        *logging.Options        `json:"logging,omitempty" yaml:"logging,omitempty" mapstructure:"logging"`
 	AuthenticationOptions *authentication.Options `json:"authentication,omitempty" yaml:"authentication,omitempty" mapstructure:"authentication"`
 	AuthorizationOptions  *authorization.Options  `json:"authorization,omitempty" yaml:"authorization,omitempty" mapstructure:"authorization"`
 	MultiClusterOptions   *multicluster.Options   `json:"multicluster,omitempty" yaml:"multicluster,omitempty" mapstructure:"multicluster"`
@@ -148,7 +146,6 @@ func New() *Config {
 	return &Config{
 		KubernetesOptions:     k8s.NewKubernetesOptions(),
 		RedisOptions:          cache.NewRedisOptions(),
-		LoggingOptions:        logging.NewLoggingOptions(),
 		AuthenticationOptions: authentication.NewOptions(),
 		AuthorizationOptions:  authorization.NewOptions(),
 		MultiClusterOptions:   multicluster.NewOptions(),
@@ -196,13 +193,8 @@ func (conf *Config) ToMap() map[string]bool {
 
 // Remove invalid options before serializing to json or yaml
 func (conf *Config) stripEmptyOptions() {
-
 	if conf.RedisOptions != nil && conf.RedisOptions.Host == "" {
 		conf.RedisOptions = nil
-	}
-
-	if conf.LoggingOptions != nil && conf.LoggingOptions.Host == "" {
-		conf.LoggingOptions = nil
 	}
 
 	if conf.MultiClusterOptions != nil && !conf.MultiClusterOptions.Enable {

@@ -24,12 +24,12 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	kubesphere "kube-aggregation/pkg/client/clientset/versioned"
+	kubeaggregation "kube-aggregation/pkg/client/clientset/versioned"
 )
 
 type Client interface {
 	Kubernetes() kubernetes.Interface
-	KubeAggregation() kubesphere.Interface
+	KubeAggregation() kubeaggregation.Interface
 	Master() string
 	Config() *rest.Config
 }
@@ -39,7 +39,7 @@ type kubernetesClient struct {
 	k8s kubernetes.Interface
 
 	// generated clientset
-	ks kubesphere.Interface
+	ks kubeaggregation.Interface
 
 	prometheus promresourcesclient.Interface
 
@@ -60,7 +60,7 @@ func NewKubernetesClientOrDie(options *KubernetesOptions) Client {
 
 	k := &kubernetesClient{
 		k8s:        kubernetes.NewForConfigOrDie(config),
-		ks:         kubesphere.NewForConfigOrDie(config),
+		ks:         kubeaggregation.NewForConfigOrDie(config),
 		prometheus: promresourcesclient.NewForConfigOrDie(config),
 		master:     config.Host,
 		config:     config,
@@ -94,7 +94,7 @@ func NewKubernetesClient(options *KubernetesOptions) (Client, error) {
 		return nil, err
 	}
 
-	k.ks, err = kubesphere.NewForConfig(config)
+	k.ks, err = kubeaggregation.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (k *kubernetesClient) Kubernetes() kubernetes.Interface {
 	return k.k8s
 }
 
-func (k *kubernetesClient) KubeAggregation() kubesphere.Interface {
+func (k *kubernetesClient) KubeAggregation() kubeaggregation.Interface {
 	return k.ks
 }
 

@@ -73,7 +73,6 @@ func (s *ServerRunOptions) Flags() (fss cliflag.NamedFlagSets) {
 	s.AuthenticationOptions.AddFlags(fss.FlagSet("authentication"), s.AuthenticationOptions)
 	s.AuthorizationOptions.AddFlags(fss.FlagSet("authorization"), s.AuthorizationOptions)
 	s.RedisOptions.AddFlags(fss.FlagSet("redis"), s.RedisOptions)
-	s.LoggingOptions.AddFlags(fss.FlagSet("logging"), s.LoggingOptions)
 	s.MultiClusterOptions.AddFlags(fss.FlagSet("multicluster"), s.MultiClusterOptions)
 
 	fs = fss.FlagSet("klog")
