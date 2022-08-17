@@ -74,8 +74,8 @@ const (
 	defaultConfigurationName = "kubeaggregation"
 
 	// DefaultConfigurationPath the default location of the configuration file
-	defaultConfigurationPath = "/etc/kubeaggregation"
-	//defaultConfigurationPath = "/Users/sino/.kube/kubeaggregation"
+	//defaultConfigurationPath = "/etc/kubeaggregation"
+	defaultConfigurationPath = "/Users/sino/.kube/kubeaggregation"
 )
 
 type config struct {

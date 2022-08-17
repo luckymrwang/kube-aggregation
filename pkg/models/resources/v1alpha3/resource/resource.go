@@ -22,17 +22,14 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	monitoringdashboardv1alpha2 "kubesphere.io/monitoring-dashboard/api/v1alpha2"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 
 	"kube-aggregation/pkg/api"
 	"kube-aggregation/pkg/apiserver/query"
 	"kube-aggregation/pkg/informers"
 	"kube-aggregation/pkg/models/resources/v1alpha3"
-	"kube-aggregation/pkg/models/resources/v1alpha3/clusterdashboard"
 	"kube-aggregation/pkg/models/resources/v1alpha3/configmap"
 	"kube-aggregation/pkg/models/resources/v1alpha3/daemonset"
-	"kube-aggregation/pkg/models/resources/v1alpha3/dashboard"
 	"kube-aggregation/pkg/models/resources/v1alpha3/deployment"
 	"kube-aggregation/pkg/models/resources/v1alpha3/ingress"
 	"kube-aggregation/pkg/models/resources/v1alpha3/job"
@@ -71,12 +68,6 @@ func NewResourceGetter(factory informers.InformerFactory, cache cache.Cache) *Re
 	clusterResourceGetters[schema.GroupVersionResource{Group: "", Version: "v1", Resource: "persistentvolumes"}] = persistentvolume.New(factory.KubernetesSharedInformerFactory())
 	clusterResourceGetters[schema.GroupVersionResource{Group: "", Version: "v1", Resource: "nodes"}] = node.New(factory.KubernetesSharedInformerFactory())
 	clusterResourceGetters[schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}] = namespace.New(factory.KubernetesSharedInformerFactory())
-
-	// kubesphere resources
-	clusterResourceGetters[monitoringdashboardv1alpha2.GroupVersion.WithResource("clusterdashboards")] = clusterdashboard.New(cache)
-
-	// federated resources
-	namespacedResourceGetters[monitoringdashboardv1alpha2.GroupVersion.WithResource("dashboards")] = dashboard.New(cache)
 
 	return &ResourceGetter{
 		namespacedResourceGetters: namespacedResourceGetters,

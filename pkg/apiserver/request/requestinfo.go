@@ -37,7 +37,6 @@ import (
 	"k8s.io/klog"
 
 	"kube-aggregation/pkg/api"
-	"kube-aggregation/pkg/constants"
 )
 
 type RequestInfoResolver interface {
@@ -207,16 +206,6 @@ func (r *RequestInfoFactory) NewRequestInfo(req *http.Request) (*RequestInfo, er
 		}
 	}
 
-	// URL forms: /workspaces/{workspace}/*
-	if currentParts[0] == "workspaces" {
-		if len(currentParts) > 1 {
-			requestInfo.Workspace = currentParts[1]
-		}
-		if len(currentParts) > 2 {
-			currentParts = currentParts[2:]
-		}
-	}
-
 	// URL forms: /namespaces/{namespace}/{kind}/*, where parts are adjusted to be relative to kind
 	if currentParts[0] == "namespaces" {
 		if len(currentParts) > 1 {
@@ -293,16 +282,6 @@ func (r *RequestInfoFactory) NewRequestInfo(req *http.Request) (*RequestInfo, er
 		}
 	}
 
-	// URL forms: /api/v1/watch/namespaces?labelSelector=kubesphere.io/workspace=system-workspace
-	if requestInfo.Verb == "watch" {
-		selector := req.URL.Query().Get("labelSelector")
-		if strings.HasPrefix(selector, workspaceSelectorPrefix) {
-			workspace := strings.TrimPrefix(selector, workspaceSelectorPrefix)
-			requestInfo.Workspace = workspace
-			requestInfo.ResourceScope = WorkspaceScope
-		}
-	}
-
 	// if there's no name on the request and we thought it was a delete before, then the actual verb is deletecollection
 	if len(requestInfo.Name) == 0 && requestInfo.Verb == "delete" {
 		requestInfo.Verb = "deletecollection"
@@ -337,12 +316,10 @@ func splitPath(path string) []string {
 }
 
 const (
-	GlobalScope             = "Global"
-	ClusterScope            = "Cluster"
-	WorkspaceScope          = "Workspace"
-	NamespaceScope          = "Namespace"
-	DevOpsScope             = "DevOps"
-	workspaceSelectorPrefix = constants.WorkspaceLabelKey + "="
+	GlobalScope    = "Global"
+	ClusterScope   = "Cluster"
+	WorkspaceScope = "Workspace"
+	NamespaceScope = "Namespace"
 )
 
 func (r *RequestInfoFactory) resolveResourceScope(request RequestInfo) string {
@@ -352,14 +329,6 @@ func (r *RequestInfoFactory) resolveResourceScope(request RequestInfo) string {
 
 	if request.Namespace != "" {
 		return NamespaceScope
-	}
-
-	if request.DevOps != "" {
-		return DevOpsScope
-	}
-
-	if request.Workspace != "" {
-		return WorkspaceScope
 	}
 
 	return ClusterScope

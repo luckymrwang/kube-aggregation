@@ -33,23 +33,21 @@ import (
 )
 
 const (
-	GroupName = "resources.kubesphere.io"
+	GroupName = "resources.icks"
 
 	tagClusteredResource  = "Clustered Resource"
-	tagComponentStatus    = "Component Status"
 	tagNamespacedResource = "Namespaced Resource"
 
 	ok = "OK"
 )
 
-var GroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1alpha3"}
+var GroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1"}
 
 func Resource(resource string) schema.GroupResource {
 	return GroupVersion.WithResource(resource).GroupResource()
 }
 
 func AddToContainer(c *restful.Container, informerFactory informers.InformerFactory, cache cache.Cache) error {
-
 	webservice := runtime.NewWebService(GroupVersion)
 	handler := New(resourcev1alpha3.NewResourceGetter(informerFactory, cache), resourcev1alpha2.NewResourceGetter(informerFactory))
 

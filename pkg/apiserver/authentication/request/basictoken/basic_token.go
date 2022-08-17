@@ -41,7 +41,6 @@ func New(auth Password) *Authenticator {
 var invalidToken = errors.New("invalid basic token")
 
 func (a *Authenticator) AuthenticateRequest(req *http.Request) (*authenticator.Response, bool, error) {
-
 	username, password, ok := req.BasicAuth()
 
 	if !ok {

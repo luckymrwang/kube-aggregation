@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"net/http"
 	rt "runtime"
-	"sync"
 	"time"
 
 	"github.com/emicklei/go-restful"
@@ -54,8 +53,6 @@ import (
 	"kube-aggregation/pkg/apiserver/filters"
 	"kube-aggregation/pkg/apiserver/request"
 	"kube-aggregation/pkg/informers"
-	configv1alpha2 "kube-aggregation/pkg/kapis/config/v1alpha2"
-	resourcesv1alpha2 "kube-aggregation/pkg/kapis/resources/v1alpha2"
 	resourcev1alpha3 "kube-aggregation/pkg/kapis/resources/v1alpha3"
 	"kube-aggregation/pkg/kapis/version"
 	"kube-aggregation/pkg/models/auth"
@@ -64,8 +61,6 @@ import (
 	"kube-aggregation/pkg/utils/clusterclient"
 	"kube-aggregation/pkg/utils/iputil"
 )
-
-var initMetrics sync.Once
 
 type APIServer struct {
 	// number of kubesphere apiserver
@@ -124,10 +119,7 @@ func (s *APIServer) PrepareRun(stopCh <-chan struct{}) error {
 // Installation happens before all informers start to cache objects, so
 //   any attempt to list objects using listers will get empty results.
 func (s *APIServer) installKubeSphereAPIs(stopCh <-chan struct{}) {
-	urlruntime.Must(configv1alpha2.AddToContainer(s.container, s.Config))
 	urlruntime.Must(resourcev1alpha3.AddToContainer(s.container, s.InformerFactory, s.RuntimeCache))
-	urlruntime.Must(resourcesv1alpha2.AddToContainer(s.container, s.KubernetesClient.Kubernetes(), s.InformerFactory,
-		s.KubernetesClient.Master()))
 
 	urlruntime.Must(version.AddToContainer(s.container, s.KubernetesClient.Kubernetes().Discovery()))
 }
@@ -291,11 +283,7 @@ func (s *APIServer) waitForResourceSync(ctx context.Context) error {
 		return err
 	}
 
-	ksGVRs := map[schema.GroupVersion][]string{
-		//{Group: "cluster.kubesphere.io", Version: "v1alpha1"}: {
-		//	"clusters",
-		//},
-	}
+	ksGVRs := map[schema.GroupVersion][]string{}
 
 	if err := waitForCacheSync(s.KubernetesClient.Kubernetes().Discovery(),
 		s.InformerFactory.KubeSphereSharedInformerFactory(),
