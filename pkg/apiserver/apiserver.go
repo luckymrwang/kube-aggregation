@@ -103,7 +103,7 @@ func (s *APIServer) PrepareRun(stopCh <-chan struct{}) error {
 		logStackOnRecover(panicReason, httpWriter)
 	})
 
-	s.installKubeSphereAPIs(stopCh)
+	s.installKubeAggregationAPIs(stopCh)
 
 	for _, ws := range s.container.RegisteredWebServices() {
 		klog.V(2).Infof("%s", ws.RootPath())
@@ -118,7 +118,7 @@ func (s *APIServer) PrepareRun(stopCh <-chan struct{}) error {
 
 // Installation happens before all informers start to cache objects, so
 //   any attempt to list objects using listers will get empty results.
-func (s *APIServer) installKubeSphereAPIs(stopCh <-chan struct{}) {
+func (s *APIServer) installKubeAggregationAPIs(stopCh <-chan struct{}) {
 	urlruntime.Must(resourcev1alpha3.AddToContainer(s.container, s.InformerFactory, s.RuntimeCache))
 
 	urlruntime.Must(version.AddToContainer(s.container, s.KubernetesClient.Kubernetes().Discovery()))
