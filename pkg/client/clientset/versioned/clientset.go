@@ -20,11 +20,11 @@ package versioned
 
 import (
 	"fmt"
+	clusterv1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/cluster/v1alpha1"
 
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
-	clusterv1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/cluster/v1alpha1"
 )
 
 type Interface interface {
@@ -36,14 +36,13 @@ type Interface interface {
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	clusterV1alpha1     *clusterv1alpha1.ClusterV1alpha1Client
+	clusterV1alpha1 *clusterv1alpha1.ClusterV1alpha1Client
 }
 
 // ClusterV1alpha1 retrieves the ClusterV1alpha1Client
 func (c *Clientset) ClusterV1alpha1() clusterv1alpha1.ClusterV1alpha1Interface {
 	return c.clusterV1alpha1
 }
-
 
 // Discovery retrieves the DiscoveryClient
 func (c *Clientset) Discovery() discovery.DiscoveryInterface {

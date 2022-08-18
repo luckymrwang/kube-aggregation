@@ -19,14 +19,15 @@ limitations under the License.
 package fake
 
 import (
+	clientset "kube-aggregation/pkg/client/clientset/versioned"
+	clusterv1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/cluster/v1alpha1"
+	fakeclusterv1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/cluster/v1alpha1/fake"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
 	fakediscovery "k8s.io/client-go/discovery/fake"
 	"k8s.io/client-go/testing"
-	clientset "kube-aggregation/pkg/client/clientset/versioned"
-	clusterv1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/cluster/v1alpha1"
-	fakeclusterv1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/cluster/v1alpha1/fake"
 )
 
 // NewSimpleClientset returns a clientset that will respond with the provided objects.

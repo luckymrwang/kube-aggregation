@@ -20,6 +20,7 @@ package v1alpha1
 
 import (
 	"context"
+	scheme "kube-aggregation/pkg/client/clientset/versioned/scheme"
 	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,7 +28,6 @@ import (
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
 	v1alpha1 "kubesphere.io/api/cluster/v1alpha1"
-	scheme "kube-aggregation/pkg/client/clientset/versioned/scheme"
 )
 
 // ClustersGetter has a method to return a ClusterInterface.

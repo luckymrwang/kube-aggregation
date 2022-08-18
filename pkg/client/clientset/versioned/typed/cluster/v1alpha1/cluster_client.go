@@ -19,9 +19,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"kube-aggregation/pkg/client/clientset/versioned/scheme"
+
 	rest "k8s.io/client-go/rest"
 	v1alpha1 "kubesphere.io/api/cluster/v1alpha1"
-	"kube-aggregation/pkg/client/clientset/versioned/scheme"
 )
 
 type ClusterV1alpha1Interface interface {

@@ -20,6 +20,9 @@ package v1alpha1
 
 import (
 	"context"
+	versioned "kube-aggregation/pkg/client/clientset/versioned"
+	internalinterfaces "kube-aggregation/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "kube-aggregation/pkg/client/listers/cluster/v1alpha1"
 	time "time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,9 +30,6 @@ import (
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 	clusterv1alpha1 "kubesphere.io/api/cluster/v1alpha1"
-	versioned "kube-aggregation/pkg/client/clientset/versioned"
-	internalinterfaces "kube-aggregation/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "kube-aggregation/pkg/client/listers/cluster/v1alpha1"
 )
 
 // ClusterInformer provides access to a shared informer and lister for
