@@ -58,18 +58,6 @@ binary: | ks-apiserver; $(info $(M)...Build all of binary.) @ ## Build all of bi
 ks-apiserver: ; $(info $(M)...Begin to build ks-apiserver binary.)  @ ## Build ks-apiserver.
 	 hack/gobuild.sh cmd/ks-apiserver;
 
-# Run all verify scripts hack/verify-*.sh
-verify-all: ; $(info $(M)...Begin to run all verify scripts hack/verify-*.sh.)  @ ## Run all verify scripts hack/verify-*.sh.
-	hack/verify-all.sh
-
-# Run go fmt against code
-fmt: ;$(info $(M)...Begin to run go fmt against code.)  @ ## Run go fmt against code.
-	gofmt -w ./pkg ./cmd ./tools ./api
-
-# Format all import, `goimports` is required.
-goimports: ;$(info $(M)...Begin to Format all import.)  @ ## Format all import, `goimports` is required.
-	@hack/update-goimports.sh
-
 # Run go vet against code
 vet: ;$(info $(M)...Begin to run go vet against code.)  @ ## Run go vet against code.
 	go vet ./pkg/... ./cmd/...
@@ -96,21 +84,6 @@ container-cross: ; $(info $(M)...Begin to build container images for multiple pl
 
 container-cross-push: ; $(info $(M)...Begin to build and push.)  @ ## Build and Push.
 	hack/docker_build_multiarch.sh
-
-helm-package: ; $(info $(M)...Begin to helm-package.)  @ ## Helm-package.
-	ls config/crds/ | xargs -i cp -r config/crds/{} config/ks-core/crds/
-	helm package config/ks-core --app-version=${APP_VERSION} --version=0.1.0 -d ./bin
-
-helm-deploy: ; $(info $(M)...Begin to helm-deploy.)  @ ## Helm-deploy.
-	ls config/crds/ | xargs -i cp -r config/crds/{} config/ks-core/crds/
-	- kubectl create ns kubesphere-controls-system
-	helm upgrade --install ks-core ./config/ks-core -n kubesphere-system --create-namespace
-	kubectl apply -f https://raw.githubusercontent.com/kubesphere/ks-installer/master/roles/ks-core/prepare/files/ks-init/role-templates.yaml
-
-helm-uninstall: ; $(info $(M)...Begin to helm-uninstall.)  @ ## Helm-uninstall.
-	- kubectl delete ns kubesphere-controls-system
-	helm uninstall ks-core -n kubesphere-system
-	kubectl delete -f https://raw.githubusercontent.com/kubesphere/ks-installer/master/roles/ks-core/prepare/files/ks-init/role-templates.yaml
 
 .PHONY: clean
 clean: ;$(info $(M)...Begin to clean.)  @ ## Clean.
