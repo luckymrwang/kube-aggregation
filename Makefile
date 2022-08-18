@@ -58,10 +58,6 @@ binary: | ks-apiserver; $(info $(M)...Build all of binary.) @ ## Build all of bi
 ks-apiserver: ; $(info $(M)...Begin to build ks-apiserver binary.)  @ ## Build ks-apiserver.
 	 hack/gobuild.sh cmd/ks-apiserver;
 
-# Run go vet against code
-vet: ;$(info $(M)...Begin to run go vet against code.)  @ ## Run go vet against code.
-	go vet ./pkg/... ./cmd/...
-
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: ;$(info $(M)...Begin to generate manifests e.g. CRD, RBAC etc..)  @ ## Generate manifests e.g. CRD, RBAC etc.
 	hack/generate_manifests.sh ${CRD_OPTIONS} ${MANIFESTS}
@@ -92,7 +88,3 @@ clean: ;$(info $(M)...Begin to clean.)  @ ## Clean.
 
 clientset:  ;$(info $(M)...Begin to find or download controller-gen.)  @ ## Find or download controller-gen,download controller-gen if necessary.
 	./hack/generate_client.sh ${GV}
-
-# Fix invalid file's license.
-update-licenses: ;$(info $(M)...Begin to update licenses.)
-	@hack/update-licenses.sh
