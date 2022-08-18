@@ -20,19 +20,16 @@ package versioned
 
 import (
 	"fmt"
-	iamv1alpha2 "kubesphere.io/client-go/restclient/versioned/iam/v1alpha2"
 
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
 	clusterv1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/cluster/v1alpha1"
-	storagev1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/storage/v1alpha1"
 )
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	ClusterV1alpha1() clusterv1alpha1.ClusterV1alpha1Interface
-	StorageV1alpha1() storagev1alpha1.StorageV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -40,8 +37,6 @@ type Interface interface {
 type Clientset struct {
 	*discovery.DiscoveryClient
 	clusterV1alpha1     *clusterv1alpha1.ClusterV1alpha1Client
-	iamV1alpha2         *iamv1alpha2.IamV1alpha2Client
-	storageV1alpha1     *storagev1alpha1.StorageV1alpha1Client
 }
 
 // ClusterV1alpha1 retrieves the ClusterV1alpha1Client
@@ -49,15 +44,6 @@ func (c *Clientset) ClusterV1alpha1() clusterv1alpha1.ClusterV1alpha1Interface {
 	return c.clusterV1alpha1
 }
 
-// IamV1alpha2 retrieves the IamV1alpha2Client
-func (c *Clientset) IamV1alpha2() iamv1alpha2.IamV1alpha2Interface {
-	return c.iamV1alpha2
-}
-
-// StorageV1alpha1 retrieves the StorageV1alpha1Client
-func (c *Clientset) StorageV1alpha1() storagev1alpha1.StorageV1alpha1Interface {
-	return c.storageV1alpha1
-}
 
 // Discovery retrieves the DiscoveryClient
 func (c *Clientset) Discovery() discovery.DiscoveryInterface {
@@ -84,14 +70,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
-	cs.iamV1alpha2, err = iamv1alpha2.NewForConfig(&configShallowCopy)
-	if err != nil {
-		return nil, err
-	}
-	cs.storageV1alpha1, err = storagev1alpha1.NewForConfig(&configShallowCopy)
-	if err != nil {
-		return nil, err
-	}
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
@@ -105,7 +83,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
 	cs.clusterV1alpha1 = clusterv1alpha1.NewForConfigOrDie(c)
-	cs.storageV1alpha1 = storagev1alpha1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -115,7 +92,6 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
 	cs.clusterV1alpha1 = clusterv1alpha1.New(c)
-	cs.storageV1alpha1 = storagev1alpha1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

@@ -19,7 +19,6 @@ require (
 	github.com/golang/example v0.0.0-20170904185048-46695d81d1fa
 	github.com/google/go-cmp v0.5.6
 	github.com/google/gops v0.3.23
-	github.com/json-iterator/go v1.1.11
 	github.com/kubernetes-csi/external-snapshotter/client/v4 v4.2.0
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.15.0
@@ -89,6 +88,7 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect

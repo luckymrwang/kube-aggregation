@@ -29,7 +29,6 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 	versioned "kube-aggregation/pkg/client/clientset/versioned"
 	internalinterfaces "kube-aggregation/pkg/client/informers/externalversions/internalinterfaces"
-	storage "kube-aggregation/pkg/client/informers/externalversions/storage"
 )
 
 // SharedInformerOption defines the functional option type for SharedInformerFactory.
@@ -171,10 +170,4 @@ type SharedInformerFactory interface {
 	internalinterfaces.SharedInformerFactory
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
-
-	Storage() storage.Interface
-}
-
-func (f *sharedInformerFactory) Storage() storage.Interface {
-	return storage.New(f, f.namespace, f.tweakListOptions)
 }

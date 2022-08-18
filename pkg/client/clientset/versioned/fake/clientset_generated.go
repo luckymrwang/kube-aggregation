@@ -27,8 +27,6 @@ import (
 	clientset "kube-aggregation/pkg/client/clientset/versioned"
 	clusterv1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/cluster/v1alpha1"
 	fakeclusterv1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/cluster/v1alpha1/fake"
-	storagev1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/storage/v1alpha1"
-	fakestoragev1alpha1 "kube-aggregation/pkg/client/clientset/versioned/typed/storage/v1alpha1/fake"
 )
 
 // NewSimpleClientset returns a clientset that will respond with the provided objects.
@@ -81,9 +79,4 @@ var _ clientset.Interface = &Clientset{}
 // ClusterV1alpha1 retrieves the ClusterV1alpha1Client
 func (c *Clientset) ClusterV1alpha1() clusterv1alpha1.ClusterV1alpha1Interface {
 	return &fakeclusterv1alpha1.FakeClusterV1alpha1{Fake: &c.Fake}
-}
-
-// StorageV1alpha1 retrieves the StorageV1alpha1Client
-func (c *Clientset) StorageV1alpha1() storagev1alpha1.StorageV1alpha1Interface {
-	return &fakestoragev1alpha1.FakeStorageV1alpha1{Fake: &c.Fake}
 }
