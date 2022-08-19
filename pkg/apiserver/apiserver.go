@@ -40,11 +40,8 @@ import (
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"kube-aggregation/pkg/apiserver/authentication/authenticators/basic"
-	"kube-aggregation/pkg/apiserver/authentication/authenticators/jwt"
 	"kube-aggregation/pkg/apiserver/authentication/request/anonymous"
 	"kube-aggregation/pkg/apiserver/authentication/request/basictoken"
-	"kube-aggregation/pkg/apiserver/authentication/request/bearertoken"
-	"kube-aggregation/pkg/apiserver/authentication/token"
 	"kube-aggregation/pkg/apiserver/authorization"
 	"kube-aggregation/pkg/apiserver/authorization/authorizer"
 	"kube-aggregation/pkg/apiserver/authorization/authorizerfactory"
@@ -85,9 +82,6 @@ type APIServer struct {
 
 	// controller-runtime cache
 	RuntimeCache runtimecache.Cache
-
-	// entity that issues tokens
-	Issuer token.Issuer
 
 	// controller-runtime client
 	RuntimeClient runtimeclient.Client
@@ -181,9 +175,7 @@ func (s *APIServer) buildHandlerChain(stopCh <-chan struct{}) {
 	authn := unionauth.New(anonymous.NewAuthenticator(),
 		basictoken.New(basic.NewBasicAuthenticator(auth.NewPasswordAuthenticator(
 			s.KubernetesClient.KubeAggregation(),
-			s.Config.AuthenticationOptions))),
-		bearertoken.New(jwt.NewTokenAuthenticator(
-			auth.NewTokenOperator(s.CacheClient, s.Issuer, s.Config.AuthenticationOptions))))
+			s.Config.AuthenticationOptions))))
 	handler = filters.WithAuthentication(handler, authn)
 	handler = filters.WithRequestInfo(handler, requestInfoResolver)
 
