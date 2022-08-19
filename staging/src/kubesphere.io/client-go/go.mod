@@ -8,7 +8,6 @@ go 1.13
 
 require (
 	github.com/go-resty/resty/v2 v2.5.0
-	k8s.io/apimachinery v0.21.2
-	k8s.io/client-go v0.21.2
-	sigs.k8s.io/controller-runtime v0.9.3
+	k8s.io/apimachinery v0.23.2
+	k8s.io/client-go v0.23.2
 )
