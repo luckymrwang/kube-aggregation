@@ -48,8 +48,6 @@ type Options struct {
 	LoginHistoryMaximumEntries int `json:"loginHistoryMaximumEntries,omitempty" yaml:"loginHistoryMaximumEntries,omitempty"`
 	// allow multiple users login from different location at the same time
 	MultipleLogin bool `json:"multipleLogin" yaml:"multipleLogin"`
-	// secret to sign jwt token
-	JwtSecret string `json:"-" yaml:"jwtSecret"`
 	// OAuthOptions defines options needed for integrated oauth plugins
 	OAuthOptions *oauth.Options `json:"oauthOptions" yaml:"oauthOptions"`
 }
@@ -63,15 +61,11 @@ func NewOptions() *Options {
 		LoginHistoryMaximumEntries:      100,
 		OAuthOptions:                    oauth.NewOptions(),
 		MultipleLogin:                   false,
-		JwtSecret:                       "",
 	}
 }
 
 func (options *Options) Validate() []error {
 	var errs []error
-	if len(options.JwtSecret) == 0 {
-		errs = append(errs, errors.New("JWT secret MUST not be empty"))
-	}
 	if options.AuthenticateRateLimiterMaxTries > options.LoginHistoryMaximumEntries {
 		errs = append(errs, errors.New("authenticateRateLimiterMaxTries MUST not be greater than loginHistoryMaximumEntries"))
 	}
@@ -82,7 +76,6 @@ func (options *Options) AddFlags(fs *pflag.FlagSet, s *Options) {
 	fs.IntVar(&options.AuthenticateRateLimiterMaxTries, "authenticate-rate-limiter-max-retries", s.AuthenticateRateLimiterMaxTries, "")
 	fs.DurationVar(&options.AuthenticateRateLimiterDuration, "authenticate-rate-limiter-duration", s.AuthenticateRateLimiterDuration, "")
 	fs.BoolVar(&options.MultipleLogin, "multiple-login", s.MultipleLogin, "Allow multiple login with the same account, disable means only one user can login at the same time.")
-	fs.StringVar(&options.JwtSecret, "jwt-secret", s.JwtSecret, "Secret to sign jwt token, must not be empty.")
 	fs.DurationVar(&options.LoginHistoryRetentionPeriod, "login-history-retention-period", s.LoginHistoryRetentionPeriod, "login-history-retention-period defines how long login history should be kept.")
 	fs.IntVar(&options.LoginHistoryMaximumEntries, "login-history-maximum-entries", s.LoginHistoryMaximumEntries, "login-history-maximum-entries defines how many entries of login history should be kept.")
 	fs.DurationVar(&options.OAuthOptions.AccessTokenMaxAge, "access-token-max-age", s.OAuthOptions.AccessTokenMaxAge, "access-token-max-age control the lifetime of access tokens, 0 means no expiration.")
