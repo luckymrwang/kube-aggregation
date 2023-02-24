@@ -24,7 +24,7 @@ import (
 
 	internal "github.com/clusterpedia-io/api/clusterpedia"
 	"github.com/clusterpedia-io/api/clusterpedia/install"
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/registry/clusterpedia/resources"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/registry/resources"
 	"github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned"
 	"github.com/clusterpedia-io/clusterpedia/pkg/informers"
 	"github.com/clusterpedia-io/clusterpedia/pkg/kubeapiserver"
