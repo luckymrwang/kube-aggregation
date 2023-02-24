@@ -39,7 +39,7 @@ else
 fi
 OUTPUT_DIR=${OUTPUT_DIR:-$REPO_ROOT}
 
-CLUSTERPEDIA_PACKAGE="github.com/clusterpedia-io/clusterpedia"
+CLUSTERPEDIA_PACKAGE="github.com/inspur"
 if [ $CLUSTERPEDIA_PACKAGE != "$(sed -n '1p' ${CLUSTERPEDIA_REPO}/go.mod | awk '{print $2}')" ]; then
     echo "CLUSTERPEDIA_REPO is invalid"
     usage

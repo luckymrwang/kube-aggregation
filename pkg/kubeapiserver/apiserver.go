@@ -21,11 +21,11 @@ import (
 	"k8s.io/apiserver/pkg/server/healthz"
 	"k8s.io/client-go/restmapper"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/informers"
-	resourcev1alpha3 "github.com/clusterpedia-io/clusterpedia/pkg/kapis/resources/v1alpha3"
-	"github.com/clusterpedia-io/clusterpedia/pkg/utils/filters"
-	"github.com/clusterpedia-io/clusterpedia/pkg/utils/iputil"
-	"github.com/clusterpedia-io/clusterpedia/pkg/version"
+	"github.com/inspur/pkg/informers"
+	resourcev1alpha3 "github.com/inspur/pkg/kapis/resources/v1alpha3"
+	"github.com/inspur/pkg/utils/filters"
+	"github.com/inspur/pkg/utils/iputil"
+	"github.com/inspur/pkg/version"
 )
 
 var (
@@ -132,7 +132,7 @@ func BuildHandlerChain(apiHandler http.Handler, c *genericapiserver.Config) http
 	handler := genericapifilters.WithRequestInfo(apiHandler, c.RequestInfoResolver)
 	handler = genericfilters.WithPanicRecovery(handler, c.RequestInfoResolver)
 
-	// https://github.com/clusterpedia-io/clusterpedia/issues/54
+	// https://github.com/inspur/issues/54
 	handler = filters.RemoveFieldSelectorFromRequest(handler)
 
 	/* used for debugging

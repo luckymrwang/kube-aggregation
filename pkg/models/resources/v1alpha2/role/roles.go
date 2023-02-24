@@ -19,15 +19,15 @@ package role
 import (
 	"k8s.io/client-go/informers"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/constants"
-	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2"
+	"github.com/inspur/pkg/constants"
+	"github.com/inspur/pkg/models/resources/v1alpha2"
 
 	"sort"
 
 	rbac "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
+	"github.com/inspur/pkg/apiserver/params"
 )
 
 type roleSearcher struct {

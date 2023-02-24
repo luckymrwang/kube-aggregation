@@ -3,7 +3,7 @@ package filters
 import (
 	"net/http"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/utils/request"
+	"github.com/inspur/pkg/utils/request"
 )
 
 func WithAcceptHeader(handler http.Handler) http.Handler {

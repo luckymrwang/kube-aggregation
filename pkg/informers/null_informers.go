@@ -23,8 +23,8 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
 
-	ksfake "github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned/fake"
-	ksinformers "github.com/clusterpedia-io/clusterpedia/pkg/client/informers/externalversions"
+	ksfake "github.com/inspur/pkg/client/clientset/versioned/fake"
+	ksinformers "github.com/inspur/pkg/client/informers/externalversions"
 )
 
 type nullInformerFactory struct {

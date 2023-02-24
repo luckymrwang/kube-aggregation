@@ -23,7 +23,7 @@ import (
 	"github.com/kubernetes-csi/external-snapshotter/client/v4/informers/externalversions"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
+	"github.com/inspur/pkg/apiserver/query"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

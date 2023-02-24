@@ -24,8 +24,8 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/utils/pointer"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
-	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2"
+	"github.com/inspur/pkg/apiserver/params"
+	"github.com/inspur/pkg/models/resources/v1alpha2"
 )
 
 var (

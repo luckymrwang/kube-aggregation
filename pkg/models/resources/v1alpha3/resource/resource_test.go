@@ -24,10 +24,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakek8s "k8s.io/client-go/kubernetes/fake"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/api"
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
-	fakeks "github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned/fake"
-	"github.com/clusterpedia-io/clusterpedia/pkg/informers"
+	"github.com/inspur/pkg/api"
+	"github.com/inspur/pkg/apiserver/query"
+	fakeks "github.com/inspur/pkg/client/clientset/versioned/fake"
+	"github.com/inspur/pkg/informers"
 )
 
 func TestResourceGetter(t *testing.T) {

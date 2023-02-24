@@ -28,8 +28,8 @@ import (
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 
-	versioned "github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/clusterpedia-io/clusterpedia/pkg/client/informers/externalversions/internalinterfaces"
+	versioned "github.com/inspur/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/inspur/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // SharedInformerOption defines the functional option type for SharedInformerFactory.

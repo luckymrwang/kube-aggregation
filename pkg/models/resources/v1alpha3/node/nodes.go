@@ -27,9 +27,9 @@ import (
 	"k8s.io/client-go/informers"
 	resourceheper "k8s.io/kubectl/pkg/util/resource"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/api"
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
-	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3"
+	"github.com/inspur/pkg/api"
+	"github.com/inspur/pkg/apiserver/query"
+	"github.com/inspur/pkg/models/resources/v1alpha3"
 )
 
 // Those annotations were added to node only for display purposes

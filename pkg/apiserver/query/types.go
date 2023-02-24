@@ -22,7 +22,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"k8s.io/apimachinery/pkg/labels"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/utils/sliceutil"
+	"github.com/inspur/pkg/utils/sliceutil"
 )
 
 const (

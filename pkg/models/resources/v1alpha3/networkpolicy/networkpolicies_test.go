@@ -25,9 +25,9 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/api"
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
-	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3"
+	"github.com/inspur/pkg/api"
+	"github.com/inspur/pkg/apiserver/query"
+	"github.com/inspur/pkg/models/resources/v1alpha3"
 )
 
 func TestListNetworkPolicies(t *testing.T) {

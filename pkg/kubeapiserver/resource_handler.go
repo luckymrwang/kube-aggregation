@@ -11,7 +11,7 @@ import (
 	genericrequest "k8s.io/apiserver/pkg/endpoints/request"
 	"k8s.io/klog/v2"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/utils/request"
+	"github.com/inspur/pkg/utils/request"
 )
 
 type ResourceHandler struct {

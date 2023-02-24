@@ -22,12 +22,12 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"k8s.io/klog"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/api"
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
-	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2"
-	resourcev1alpha2 "github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2/resource"
-	resourcev1alpha3 "github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/resource"
+	"github.com/inspur/pkg/api"
+	"github.com/inspur/pkg/apiserver/params"
+	"github.com/inspur/pkg/apiserver/query"
+	"github.com/inspur/pkg/models/resources/v1alpha2"
+	resourcev1alpha2 "github.com/inspur/pkg/models/resources/v1alpha2/resource"
+	resourcev1alpha3 "github.com/inspur/pkg/models/resources/v1alpha3/resource"
 )
 
 type Handler struct {

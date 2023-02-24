@@ -1,4 +1,4 @@
-module github.com/clusterpedia-io/clusterpedia
+module github.com/inspur
 
 go 1.19
 

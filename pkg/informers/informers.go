@@ -23,8 +23,8 @@ import (
 	k8sinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned"
-	ksinformers "github.com/clusterpedia-io/clusterpedia/pkg/client/informers/externalversions"
+	"github.com/inspur/pkg/client/clientset/versioned"
+	ksinformers "github.com/inspur/pkg/client/informers/externalversions"
 )
 
 // default re-sync period for all informer factories

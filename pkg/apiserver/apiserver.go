@@ -24,11 +24,11 @@ import (
 
 	internal "github.com/clusterpedia-io/api/clusterpedia"
 	"github.com/clusterpedia-io/api/clusterpedia/install"
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/registry/resources"
-	"github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned"
-	"github.com/clusterpedia-io/clusterpedia/pkg/informers"
-	"github.com/clusterpedia-io/clusterpedia/pkg/kubeapiserver"
-	"github.com/clusterpedia-io/clusterpedia/pkg/utils/filters"
+	"github.com/inspur/pkg/apiserver/registry/resources"
+	"github.com/inspur/pkg/client/clientset/versioned"
+	"github.com/inspur/pkg/informers"
+	"github.com/inspur/pkg/kubeapiserver"
+	"github.com/inspur/pkg/utils/filters"
 )
 
 var (

@@ -1,5 +1,5 @@
 # **DEPRECATED** Clusterpedia Charts
-**Deprecated Charts, Please use [Clusterpedia Helm](https://github.com/clusterpedia-io/clusterpedia-helm/tree/main/charts/clusterpedia)**
+**Deprecated Charts, Please use [Clusterpedia Helm](https://github.com/inspur-helm/tree/main/charts/clusterpedia)**
 > Once clusterpedia kustomize is ready, delete this charts/clusterpedia
 
 This name Clusterpedia is inspired by Wikipedia. It is an encyclopedia of multi-cluster to synchronize, search for, and
@@ -18,7 +18,7 @@ a quick and easy way.
 Pull the Clusterpedia repository.
 
 ```bash
-git clone https://github.com/clusterpedia-io/clusterpedia.git
+git clone https://github.com/inspur.git
 cd clusterpedia/charts/clusterpedia
 ```
 
@@ -122,7 +122,7 @@ automatically synchronize them as `PediaCluster`,
 so you don't need to maintain `PediaCluster` manually based on the managed clusters.
 
 We maintain `PediaCluster` for each multi-cloud platform in
-the [Clusterpedia repository](https://github.com/clusterpedia-io/clusterpedia/tree/main/deploy/clusterimportpolicy).
+the [Clusterpedia repository](https://github.com/inspur/tree/main/deploy/clusterimportpolicy).
 ClusterImportPolicy` for each multi-cloud platform.
 **People also submit ClusterImportPolicy to Clusterpedia for interfacing to other multi-cloud platforms.**
 

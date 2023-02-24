@@ -21,14 +21,14 @@ import (
 
 	"k8s.io/client-go/informers"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2"
+	"github.com/inspur/pkg/models/resources/v1alpha2"
 
 	"sort"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
+	"github.com/inspur/pkg/apiserver/params"
 )
 
 const (

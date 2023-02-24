@@ -60,7 +60,7 @@ cleanup() {
 trap "cleanup" EXIT SIGINT
 cleanup
 
-go_pkg="${go_path}/src/github.com/clusterpedia-io/clusterpedia"
+go_pkg="${go_path}/src/github.com/inspur"
 go_pkg_dir=$(dirname "${go_pkg}")
 mkdir -p "${go_pkg_dir}"
 
@@ -74,7 +74,7 @@ client-gen \
     --go-header-file="hack/boilerplate.go.txt" \
     --input-base="github.com/clusterpedia-io/api" \
     --input="cluster/v1alpha2,policy/v1alpha1" \
-    --output-package="github.com/clusterpedia-io/clusterpedia/pkg/generated/clientset" \
+    --output-package="github.com/inspur/pkg/generated/clientset" \
     --clientset-name="versioned" \
     --plural-exceptions="ClusterSyncResources:ClusterSyncResources"
 
@@ -82,22 +82,22 @@ echo "Generating with lister-gen"
 lister-gen \
     --go-header-file="hack/boilerplate.go.txt" \
     --input-dirs="github.com/clusterpedia-io/api/cluster/v1alpha2,github.com/clusterpedia-io/api/policy/v1alpha1" \
-    --output-package="github.com/clusterpedia-io/clusterpedia/pkg/generated/listers" \
+    --output-package="github.com/inspur/pkg/generated/listers" \
     --plural-exceptions="ClusterSyncResources:ClusterSyncResources"
 
 echo "Generating with informer-gen"
 informer-gen \
     --go-header-file="hack/boilerplate.go.txt" \
     --input-dirs="github.com/clusterpedia-io/api/cluster/v1alpha2,github.com/clusterpedia-io/api/policy/v1alpha1" \
-    --versioned-clientset-package="github.com/clusterpedia-io/clusterpedia/pkg/generated/clientset/versioned" \
-    --listers-package="github.com/clusterpedia-io/clusterpedia/pkg/generated/listers" \
-    --output-package="github.com/clusterpedia-io/clusterpedia/pkg/generated/informers" \
+    --versioned-clientset-package="github.com/inspur/pkg/generated/clientset/versioned" \
+    --listers-package="github.com/inspur/pkg/generated/listers" \
+    --output-package="github.com/inspur/pkg/generated/informers" \
     --plural-exceptions="ClusterSyncResources:ClusterSyncResources"
 
 #echo "Generating with openapi-gen"
 #openapi-gen \
 #  --go-header-file hack/boilerplate.go.txt \
-#  --input-dirs=github.com/clusterpedia-io/clusterpedia/pkg/apis/pedia/v1alpha1 \
+#  --input-dirs=github.com/inspur/pkg/apis/pedia/v1alpha1 \
 #  --input-dirs "k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/version" \
-#  --output-package=github.com/clusterpedia-io/clusterpedia/pkg/generated/openapi \
+#  --output-package=github.com/inspur/pkg/generated/openapi \
 #  -O zz_generated.openapi

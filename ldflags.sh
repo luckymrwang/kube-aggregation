@@ -14,10 +14,10 @@ fi
 
 KUBE_DEPENDENCE_VERSION=$(go list -m k8s.io/kubernetes | cut -d' ' -f2)
 
-LDFLAGS+=" -X github.com/clusterpedia-io/clusterpedia/pkg/version.gitVersion=${GIT_VERSION}"
-LDFLAGS+=" -X github.com/clusterpedia-io/clusterpedia/pkg/version.gitCommit=${GIT_COMMIT_HASH}"
-LDFLAGS+=" -X github.com/clusterpedia-io/clusterpedia/pkg/version.gitTreeState=${GIT_TREESTATE}"
-LDFLAGS+=" -X github.com/clusterpedia-io/clusterpedia/pkg/version.buildDate=${BUILD_DATE}"
+LDFLAGS+=" -X github.com/inspur/pkg/version.gitVersion=${GIT_VERSION}"
+LDFLAGS+=" -X github.com/inspur/pkg/version.gitCommit=${GIT_COMMIT_HASH}"
+LDFLAGS+=" -X github.com/inspur/pkg/version.gitTreeState=${GIT_TREESTATE}"
+LDFLAGS+=" -X github.com/inspur/pkg/version.buildDate=${BUILD_DATE}"
 
 # The `client-go/pkg/version` effects the **User-Agent** when using client-go to request.
 # User-Agent="<bin name>/$(GIT_VERSION) ($(GOOS)/$(GOARCH)) kubernetes/$(GIT_COMMIT_HASH)[/<component name>]"

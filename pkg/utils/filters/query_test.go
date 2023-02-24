@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/utils/request"
+	"github.com/inspur/pkg/utils/request"
 )
 
 func TestWithRequestQuery(t *testing.T) {

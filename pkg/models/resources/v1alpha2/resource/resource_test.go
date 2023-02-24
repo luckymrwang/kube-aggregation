@@ -25,11 +25,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakek8s "k8s.io/client-go/kubernetes/fake"
 
-	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
-	fakeks "github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned/fake"
-	"github.com/clusterpedia-io/clusterpedia/pkg/informers"
-	"github.com/clusterpedia-io/clusterpedia/pkg/models"
-	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2"
+	"github.com/inspur/pkg/apiserver/params"
+	fakeks "github.com/inspur/pkg/client/clientset/versioned/fake"
+	"github.com/inspur/pkg/informers"
+	"github.com/inspur/pkg/models"
+	"github.com/inspur/pkg/models/resources/v1alpha2"
 )
 
 func TestConditions(t *testing.T) {
