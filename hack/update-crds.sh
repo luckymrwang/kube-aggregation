@@ -5,7 +5,7 @@ set -o nounset
 set -o pipefail
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
-API_ROOT="${REPO_ROOT}/staging/src/github.com/clusterpedia-io/api"
+API_ROOT="${REPO_ROOT}/staging/src/github.com/inspur/pkg/api"
 
 echo "Generating CRDs With controller-gen"
 GO11MODULE=on go install sigs.k8s.io/controller-tools/cmd/controller-gen

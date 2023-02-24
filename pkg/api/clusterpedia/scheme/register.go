@@ -1,7 +1,7 @@
 package scheme
 
 import (
-	"github.com/clusterpedia-io/api/clusterpedia/install"
+	"github.com/inspur/pkg/api/clusterpedia/install"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 )

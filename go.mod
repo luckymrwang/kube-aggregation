@@ -3,7 +3,6 @@ module github.com/inspur
 go 1.19
 
 require (
-	github.com/clusterpedia-io/api v0.0.0
 	github.com/emicklei/go-restful v2.16.0+incompatible
 	github.com/emicklei/go-restful-openapi v1.4.1
 	github.com/emicklei/go-restful/v3 v3.8.0
@@ -125,7 +124,6 @@ require (
 )
 
 replace (
-	github.com/clusterpedia-io/api => ./staging/src/github.com/clusterpedia-io/api
 	k8s.io/api => k8s.io/api v0.25.2
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.25.2
 	k8s.io/apimachinery => k8s.io/apimachinery v0.25.2

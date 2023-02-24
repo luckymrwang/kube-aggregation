@@ -5,7 +5,7 @@ set -o nounset
 set -o pipefail
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
-API_ROOT="${REPO_ROOT}/staging/src/github.com/clusterpedia-io/api"
+API_ROOT="${REPO_ROOT}/staging/src/github.com/inspur/pkg/api"
 
 # GO111MODULE=on go install k8s.io/code-generator/cmd/register-gen
 GO111MODULE=on go install k8s.io/code-generator/cmd/deepcopy-gen
@@ -72,7 +72,7 @@ export GOPATH="${go_path}"
 echo "Generating with client-gen"
 client-gen \
     --go-header-file="hack/boilerplate.go.txt" \
-    --input-base="github.com/clusterpedia-io/api" \
+    --input-base="github.com/inspur/pkg/api" \
     --input="cluster/v1alpha2,policy/v1alpha1" \
     --output-package="github.com/inspur/pkg/generated/clientset" \
     --clientset-name="versioned" \
@@ -81,14 +81,14 @@ client-gen \
 echo "Generating with lister-gen"
 lister-gen \
     --go-header-file="hack/boilerplate.go.txt" \
-    --input-dirs="github.com/clusterpedia-io/api/cluster/v1alpha2,github.com/clusterpedia-io/api/policy/v1alpha1" \
+    --input-dirs="github.com/inspur/pkg/api/cluster/v1alpha2,github.com/inspur/pkg/api/policy/v1alpha1" \
     --output-package="github.com/inspur/pkg/generated/listers" \
     --plural-exceptions="ClusterSyncResources:ClusterSyncResources"
 
 echo "Generating with informer-gen"
 informer-gen \
     --go-header-file="hack/boilerplate.go.txt" \
-    --input-dirs="github.com/clusterpedia-io/api/cluster/v1alpha2,github.com/clusterpedia-io/api/policy/v1alpha1" \
+    --input-dirs="github.com/inspur/pkg/api/cluster/v1alpha2,github.com/inspur/pkg/api/policy/v1alpha1" \
     --versioned-clientset-package="github.com/inspur/pkg/generated/clientset/versioned" \
     --listers-package="github.com/inspur/pkg/generated/listers" \
     --output-package="github.com/inspur/pkg/generated/informers" \

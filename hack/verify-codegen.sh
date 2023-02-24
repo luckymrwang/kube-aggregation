@@ -6,7 +6,7 @@ set -o pipefail
 
 SCRIPT_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
 
-API_DIFFROOT="${SCRIPT_ROOT}/staging/src/github.com/clusterpedia-io/api"
+API_DIFFROOT="${SCRIPT_ROOT}/staging/src/github.com/inspur/pkg/api"
 GENERATED_DIFFROOT="${SCRIPT_ROOT}/pkg/generated"
 
 _tmp="${SCRIPT_ROOT}/_tmp"

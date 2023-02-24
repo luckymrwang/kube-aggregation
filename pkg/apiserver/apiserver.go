@@ -22,8 +22,8 @@ import (
 	"k8s.io/client-go/util/retry"
 	"k8s.io/klog"
 
-	internal "github.com/clusterpedia-io/api/clusterpedia"
-	"github.com/clusterpedia-io/api/clusterpedia/install"
+	internal "github.com/inspur/pkg/api/clusterpedia"
+	"github.com/inspur/pkg/api/clusterpedia/install"
 	"github.com/inspur/pkg/apiserver/registry/resources"
 	"github.com/inspur/pkg/client/clientset/versioned"
 	"github.com/inspur/pkg/informers"

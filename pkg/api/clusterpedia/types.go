@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/clusterpedia-io/api/clusterpedia/fields"
+	"github.com/inspur/pkg/api/clusterpedia/fields"
 )
 
 const (
