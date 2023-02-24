@@ -73,7 +73,6 @@ func (h *Handler) handleGetResources(request *restful.Request, response *restful
 	}
 
 	response.WriteEntity(resultV1alpha2)
-
 }
 
 // handleListResources retrieves resources

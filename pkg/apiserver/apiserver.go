@@ -66,7 +66,7 @@ type Config struct {
 	GenericConfig *genericapiserver.RecommendedConfig
 }
 
-type ClusterPediaServer struct {
+type AggregationServer struct {
 	GenericAPIServer *genericapiserver.GenericAPIServer
 }
 
@@ -96,7 +96,7 @@ func (cfg *Config) Complete() CompletedConfig {
 	return CompletedConfig{&c}
 }
 
-func (config completedConfig) New() (*ClusterPediaServer, error) {
+func (config completedConfig) New() (*AggregationServer, error) {
 	if config.ClientConfig == nil {
 		return nil, fmt.Errorf("CompletedConfig.New() called with config.ClientConfig == nil")
 	}
@@ -140,7 +140,7 @@ func (config completedConfig) New() (*ClusterPediaServer, error) {
 		return handler
 	}
 
-	genericServer, err := config.GenericConfig.New("clusterpedia", hooksDelegate{kubeResourceAPIServer})
+	genericServer, err := config.GenericConfig.New("aggregationServer", hooksDelegate{kubeResourceAPIServer})
 	if err != nil {
 		return nil, err
 	}
@@ -154,16 +154,16 @@ func (config completedConfig) New() (*ClusterPediaServer, error) {
 		return nil, err
 	}
 
-	genericServer.AddPostStartHookOrDie("start-clusterpedia-informers", func(context genericapiserver.PostStartHookContext) error {
+	genericServer.AddPostStartHookOrDie("start-aggregation-informers", func(context genericapiserver.PostStartHookContext) error {
 		return waitForResourceSync(context.StopCh, informerFactory, kubernetesClient)
 	})
 
-	return &ClusterPediaServer{
+	return &AggregationServer{
 		GenericAPIServer: genericServer,
 	}, nil
 }
 
-func (server *ClusterPediaServer) Run(ctx context.Context) error {
+func (server *AggregationServer) Run(ctx context.Context) error {
 	return server.GenericAPIServer.PrepareRun().Run(ctx.Done())
 }
 
