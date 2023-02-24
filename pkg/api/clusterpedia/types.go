@@ -12,30 +12,6 @@ import (
 	"github.com/inspur/pkg/api/clusterpedia/fields"
 )
 
-const (
-	SearchLabelNames      = "search.clusterpedia.io/names"
-	SearchLabelClusters   = "search.clusterpedia.io/clusters"
-	SearchLabelNamespaces = "search.clusterpedia.io/namespaces"
-	SearchLabelOrderBy    = "search.clusterpedia.io/orderby"
-
-	SearchLabelOwnerUID           = "search.clusterpedia.io/owner-uid"
-	SearchLabelOwnerName          = "search.clusterpedia.io/owner-name"
-	SearchLabelOwnerGroupResource = "search.clusterpedia.io/owner-gr"
-	SearchLabelOwnerSeniority     = "search.clusterpedia.io/owner-seniority"
-
-	SearchLabelWithContinue       = "search.clusterpedia.io/with-continue"
-	SearchLabelWithRemainingCount = "search.clusterpedia.io/with-remaining-count"
-
-	SearchLabelLimit  = "search.clusterpedia.io/limit"
-	SearchLabelOffset = "search.clusterpedia.io/offset"
-
-	SearchLabelSince  = "search.clusterpedia.io/since"
-	SearchLabelBefore = "search.clusterpedia.io/before"
-
-	ShadowAnnotationClusterName          = "shadow.clusterpedia.io/cluster-name"
-	ShadowAnnotationGroupVersionResource = "shadow.clusterpedia.io/gvr"
-)
-
 type OrderBy struct {
 	Field string
 	Desc  bool
