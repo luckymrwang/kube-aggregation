@@ -4,7 +4,6 @@ import (
 	"net/url"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // +k8s:conversion-gen:explicit-from=net/url.Values
@@ -59,49 +58,4 @@ type ListOptions struct {
 
 type Resources struct {
 	metav1.TypeMeta `json:",inline"`
-}
-
-// +genclient
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type CollectionResource struct {
-	metav1.TypeMeta `json:",inline"`
-
-	// +optional
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	// +required
-	ResourceTypes []CollectionResourceType `json:"resourceTypes"`
-
-	// +optional
-	Items []runtime.RawExtension `json:"items,omitempty"`
-
-	// +optional
-	Continue string `json:"continue,omitempty"`
-
-	// +optional
-	RemainingItemCount *int64 `json:"remainingItemCount,omitempty"`
-}
-
-type CollectionResourceType struct {
-	Group string `json:"group"`
-
-	Version string `json:"version"`
-
-	// +optional
-	Kind string `json:"kind,omitempty"`
-
-	Resource string `json:"resource"`
-}
-
-// +kubebuilder:object:root=true
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-type CollectionResourceList struct {
-	metav1.TypeMeta `json:",inline"`
-
-	// +optional
-	metav1.ListMeta `json:"metadata,omitempty"`
-
-	Items []CollectionResource `json:"items"`
 }

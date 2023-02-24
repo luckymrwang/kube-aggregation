@@ -22,8 +22,6 @@ func init() {
 
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-		&CollectionResource{},
-		&CollectionResourceList{},
 		&Resources{},
 		&ListOptions{},
 
