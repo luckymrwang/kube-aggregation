@@ -29,7 +29,7 @@ import (
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"kube-aggregation/pkg/apiserver/query"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
 )
 
 const (

@@ -26,9 +26,9 @@ import (
 	"github.com/kubernetes-csi/external-snapshotter/client/v4/informers/externalversions"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"kube-aggregation/pkg/api"
-	"kube-aggregation/pkg/apiserver/query"
-	"kube-aggregation/pkg/models/resources/v1alpha3"
+	"github.com/clusterpedia-io/clusterpedia/pkg/api"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3"
 )
 
 const (

@@ -21,9 +21,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/informers"
 
-	"kube-aggregation/pkg/api"
-	"kube-aggregation/pkg/apiserver/query"
-	"kube-aggregation/pkg/models/resources/v1alpha3"
+	"github.com/clusterpedia-io/clusterpedia/pkg/api"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3"
 )
 
 type servicesGetter struct {

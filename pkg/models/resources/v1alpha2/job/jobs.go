@@ -19,13 +19,13 @@ package job
 import (
 	"k8s.io/client-go/informers"
 
-	"kube-aggregation/pkg/models/resources/v1alpha2"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2"
 
 	"sort"
 	"time"
 
-	"kube-aggregation/pkg/server/params"
-	"kube-aggregation/pkg/utils/k8sutil"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
+	"github.com/clusterpedia-io/clusterpedia/pkg/utils/k8sutil"
 
 	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/labels"

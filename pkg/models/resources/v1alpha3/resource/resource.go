@@ -18,29 +18,28 @@ package resource
 
 import (
 	"errors"
-	"kube-aggregation/pkg/models/resources/v1alpha3/persistentvolume"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
 
-	"kube-aggregation/pkg/api"
-	"kube-aggregation/pkg/apiserver/query"
-	"kube-aggregation/pkg/informers"
-	"kube-aggregation/pkg/models/resources/v1alpha3"
-	"kube-aggregation/pkg/models/resources/v1alpha3/configmap"
-	"kube-aggregation/pkg/models/resources/v1alpha3/daemonset"
-	"kube-aggregation/pkg/models/resources/v1alpha3/deployment"
-	"kube-aggregation/pkg/models/resources/v1alpha3/ingress"
-	"kube-aggregation/pkg/models/resources/v1alpha3/job"
-	"kube-aggregation/pkg/models/resources/v1alpha3/namespace"
-	"kube-aggregation/pkg/models/resources/v1alpha3/networkpolicy"
-	"kube-aggregation/pkg/models/resources/v1alpha3/node"
-	"kube-aggregation/pkg/models/resources/v1alpha3/pod"
-	"kube-aggregation/pkg/models/resources/v1alpha3/secret"
-	"kube-aggregation/pkg/models/resources/v1alpha3/service"
-	"kube-aggregation/pkg/models/resources/v1alpha3/serviceaccount"
-	"kube-aggregation/pkg/models/resources/v1alpha3/statefulset"
+	"github.com/clusterpedia-io/clusterpedia/pkg/api"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
+	"github.com/clusterpedia-io/clusterpedia/pkg/informers"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/configmap"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/daemonset"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/deployment"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/ingress"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/job"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/namespace"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/networkpolicy"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/node"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/persistentvolume"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/pod"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/secret"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/service"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/serviceaccount"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/statefulset"
 )
 
 var ErrResourceNotSupported = errors.New("resource is not supported")
@@ -50,7 +49,7 @@ type ResourceGetter struct {
 	namespacedResourceGetters map[schema.GroupVersionResource]v1alpha3.Interface
 }
 
-func NewResourceGetter(factory informers.InformerFactory, cache cache.Cache) *ResourceGetter {
+func NewResourceGetter(factory informers.InformerFactory) *ResourceGetter {
 	namespacedResourceGetters := make(map[schema.GroupVersionResource]v1alpha3.Interface)
 	clusterResourceGetters := make(map[schema.GroupVersionResource]v1alpha3.Interface)
 

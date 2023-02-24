@@ -26,8 +26,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"kube-aggregation/pkg/api"
-	"kube-aggregation/pkg/apiserver/query"
+	"github.com/clusterpedia-io/clusterpedia/pkg/api"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
 )
 
 var crds = []*v1.CustomResourceDefinition{

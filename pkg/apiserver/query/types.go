@@ -19,10 +19,10 @@ package query
 import (
 	"strconv"
 
-	"github.com/emicklei/go-restful"
+	"github.com/emicklei/go-restful/v3"
 	"k8s.io/apimachinery/pkg/labels"
 
-	"kube-aggregation/pkg/utils/sliceutil"
+	"github.com/clusterpedia-io/clusterpedia/pkg/utils/sliceutil"
 )
 
 const (

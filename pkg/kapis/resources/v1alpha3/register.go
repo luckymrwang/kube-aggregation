@@ -17,23 +17,22 @@ limitations under the License.
 package v1alpha3
 
 import (
-	"github.com/emicklei/go-restful"
-	restfulspec "github.com/emicklei/go-restful-openapi"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
-
-	"kube-aggregation/pkg/api"
-	"kube-aggregation/pkg/apiserver/query"
-	"kube-aggregation/pkg/apiserver/runtime"
-	"kube-aggregation/pkg/informers"
-	resourcev1alpha2 "kube-aggregation/pkg/models/resources/v1alpha2/resource"
-	resourcev1alpha3 "kube-aggregation/pkg/models/resources/v1alpha3/resource"
-
 	"net/http"
+
+	restfulspec "github.com/emicklei/go-restful-openapi"
+	"github.com/emicklei/go-restful/v3"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/clusterpedia-io/clusterpedia/pkg/api"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/runtime"
+	"github.com/clusterpedia-io/clusterpedia/pkg/informers"
+	resourcev1alpha2 "github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2/resource"
+	resourcev1alpha3 "github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/resource"
 )
 
 const (
-	GroupName = "resources.icks"
+	GroupName = ""
 
 	tagClusteredResource  = "Clustered Resource"
 	tagNamespacedResource = "Namespaced Resource"
@@ -43,13 +42,9 @@ const (
 
 var GroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1"}
 
-func Resource(resource string) schema.GroupResource {
-	return GroupVersion.WithResource(resource).GroupResource()
-}
-
-func AddToContainer(c *restful.Container, informerFactory informers.InformerFactory, cache cache.Cache) error {
+func AddToContainer(c *restful.Container, informerFactory informers.InformerFactory) error {
 	webservice := runtime.NewWebService(GroupVersion)
-	handler := New(resourcev1alpha3.NewResourceGetter(informerFactory, cache), resourcev1alpha2.NewResourceGetter(informerFactory))
+	handler := New(resourcev1alpha3.NewResourceGetter(informerFactory), resourcev1alpha2.NewResourceGetter(informerFactory))
 
 	webservice.Route(webservice.GET("/{resources}").
 		To(handler.handleListResources).

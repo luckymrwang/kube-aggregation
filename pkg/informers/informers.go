@@ -20,12 +20,11 @@ import (
 	"reflect"
 	"time"
 
-	prominformers "github.com/prometheus-operator/prometheus-operator/pkg/client/informers/externalversions"
 	k8sinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 
-	"kube-aggregation/pkg/client/clientset/versioned"
-	ksinformers "kube-aggregation/pkg/client/informers/externalversions"
+	"github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned"
+	ksinformers "github.com/clusterpedia-io/clusterpedia/pkg/client/informers/externalversions"
 )
 
 // default re-sync period for all informer factories
@@ -47,9 +46,8 @@ type GenericInformerFactory interface {
 }
 
 type informerFactories struct {
-	informerFactory           k8sinformers.SharedInformerFactory
-	ksInformerFactory         ksinformers.SharedInformerFactory
-	prometheusInformerFactory prominformers.SharedInformerFactory
+	informerFactory   k8sinformers.SharedInformerFactory
+	ksInformerFactory ksinformers.SharedInformerFactory
 }
 
 func NewInformerFactories(client kubernetes.Interface, ksClient versioned.Interface) InformerFactory {
@@ -74,10 +72,6 @@ func (f *informerFactories) KubeSphereSharedInformerFactory() ksinformers.Shared
 	return f.ksInformerFactory
 }
 
-func (f *informerFactories) PrometheusSharedInformerFactory() prominformers.SharedInformerFactory {
-	return f.prometheusInformerFactory
-}
-
 func (f *informerFactories) Start(stopCh <-chan struct{}) {
 	if f.informerFactory != nil {
 		f.informerFactory.Start(stopCh)
@@ -85,9 +79,5 @@ func (f *informerFactories) Start(stopCh <-chan struct{}) {
 
 	if f.ksInformerFactory != nil {
 		f.ksInformerFactory.Start(stopCh)
-	}
-
-	if f.prometheusInformerFactory != nil {
-		f.prometheusInformerFactory.Start(stopCh)
 	}
 }

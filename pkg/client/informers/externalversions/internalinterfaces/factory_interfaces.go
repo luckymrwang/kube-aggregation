@@ -19,7 +19,7 @@ limitations under the License.
 package internalinterfaces
 
 import (
-	versioned "kube-aggregation/pkg/client/clientset/versioned"
+	versioned "github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned"
 	time "time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

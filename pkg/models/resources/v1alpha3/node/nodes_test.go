@@ -27,9 +27,9 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"kube-aggregation/pkg/api"
-	"kube-aggregation/pkg/apiserver/query"
-	"kube-aggregation/pkg/models/resources/v1alpha3"
+	"github.com/clusterpedia-io/clusterpedia/pkg/api"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3"
 )
 
 // mergeResourceLists will merge resoure lists. When two lists have the same resourece, the value from

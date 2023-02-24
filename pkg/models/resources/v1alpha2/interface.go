@@ -21,9 +21,9 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"kube-aggregation/pkg/constants"
-	"kube-aggregation/pkg/server/params"
-	"kube-aggregation/pkg/utils/sliceutil"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
+	"github.com/clusterpedia-io/clusterpedia/pkg/constants"
+	"github.com/clusterpedia-io/clusterpedia/pkg/utils/sliceutil"
 )
 
 const (

@@ -1,232 +1,195 @@
-/*
-Copyright 2019 The KubeAggregation Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package apiserver
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/http"
-	rt "runtime"
-	"time"
 
-	"github.com/emicklei/go-restful"
 	"k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metainternal "k8s.io/apimachinery/pkg/apis/meta/internalversion"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	urlruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/util/sets"
-	unionauth "k8s.io/apiserver/pkg/authentication/request/union"
-	"k8s.io/apiserver/pkg/endpoints/handlers/responsewriters"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/apimachinery/pkg/version"
+	"k8s.io/apiserver/pkg/registry/rest"
+	genericapiserver "k8s.io/apiserver/pkg/server"
+	"k8s.io/apiserver/pkg/server/healthz"
 	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/kubernetes"
+	clientrest "k8s.io/client-go/rest"
+	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/util/retry"
 	"k8s.io/klog"
-	clusterv1alpha1 "kubesphere.io/api/cluster/v1alpha1"
-	runtimecache "sigs.k8s.io/controller-runtime/pkg/cache"
-	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"kube-aggregation/pkg/apiserver/authentication/authenticators/basic"
-	"kube-aggregation/pkg/apiserver/authentication/request/anonymous"
-	"kube-aggregation/pkg/apiserver/authentication/request/basictoken"
-	"kube-aggregation/pkg/apiserver/authorization"
-	"kube-aggregation/pkg/apiserver/authorization/authorizer"
-	"kube-aggregation/pkg/apiserver/authorization/authorizerfactory"
-	apiserverconfig "kube-aggregation/pkg/apiserver/config"
-	"kube-aggregation/pkg/apiserver/dispatch"
-	"kube-aggregation/pkg/apiserver/filters"
-	"kube-aggregation/pkg/apiserver/request"
-	"kube-aggregation/pkg/informers"
-	resourcev1alpha3 "kube-aggregation/pkg/kapis/resources/v1alpha3"
-	"kube-aggregation/pkg/kapis/version"
-	"kube-aggregation/pkg/models/auth"
-	"kube-aggregation/pkg/simple/client/cache"
-	"kube-aggregation/pkg/simple/client/k8s"
-	"kube-aggregation/pkg/utils/clusterclient"
-	"kube-aggregation/pkg/utils/iputil"
+	internal "github.com/clusterpedia-io/api/clusterpedia"
+	"github.com/clusterpedia-io/api/clusterpedia/install"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/registry/clusterpedia/resources"
+	"github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned"
+	"github.com/clusterpedia-io/clusterpedia/pkg/informers"
+	"github.com/clusterpedia-io/clusterpedia/pkg/kubeapiserver"
+	"github.com/clusterpedia-io/clusterpedia/pkg/utils/filters"
 )
 
-type APIServer struct {
-	// number of kubesphere apiserver
-	ServerCount int
+var (
+	// Scheme defines methods for serializing and deserializing API objects.
+	Scheme = runtime.NewScheme()
+	// Codecs provides methods for retrieving codecs and serializers for specific
+	// versions and content types.
+	Codecs = serializer.NewCodecFactory(Scheme)
 
-	Server *http.Server
+	// ParameterCodec handles versioning of objects that are converted to query parameters.
+	ParameterCodec = runtime.NewParameterCodec(Scheme)
+)
 
-	Config *apiserverconfig.Config
+func init() {
+	install.Install(Scheme)
 
-	// webservice container, where all webservice defines
-	container *restful.Container
+	// we need to add the options to empty v1
+	// TODO fix the server code to avoid this
+	metav1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
+	_ = metainternal.AddToScheme(Scheme)
 
-	// kubeClient is a collection of all kubernetes(include CRDs) objects clientset
-	KubernetesClient k8s.Client
-
-	// informerFactory is a collection of all kubernetes(include CRDs) objects informers,
-	// mainly for fast query
-	InformerFactory informers.InformerFactory
-
-	// cache is used for short lived objects, like session
-	CacheClient cache.Interface
-
-	// controller-runtime cache
-	RuntimeCache runtimecache.Cache
-
-	// controller-runtime client
-	RuntimeClient runtimeclient.Client
-
-	ClusterClient clusterclient.ClusterClients
+	// TODO: keep the generic API server from wanting this
+	unversioned := schema.GroupVersion{Group: "", Version: "v1"}
+	Scheme.AddUnversionedTypes(unversioned,
+		&metav1.Status{},
+		&metav1.APIVersions{},
+		&metav1.APIGroupList{},
+		&metav1.APIGroup{},
+		&metav1.APIResourceList{},
+	)
 }
 
-func (s *APIServer) PrepareRun(stopCh <-chan struct{}) error {
-	s.container = restful.NewContainer()
-	s.container.Filter(logRequestAndResponse)
-	s.container.Router(restful.CurlyRouter{})
-	s.container.RecoverHandler(func(panicReason interface{}, httpWriter http.ResponseWriter) {
-		logStackOnRecover(panicReason, httpWriter)
+// Config defines the config for the apiserver
+type Config struct {
+	GenericConfig *genericapiserver.RecommendedConfig
+}
+
+type ClusterPediaServer struct {
+	GenericAPIServer *genericapiserver.GenericAPIServer
+}
+
+type completedConfig struct {
+	GenericConfig genericapiserver.CompletedConfig
+
+	ClientConfig *clientrest.Config
+}
+
+// CompletedConfig embeds a private pointer that cannot be instantiated outside of this package.
+type CompletedConfig struct {
+	*completedConfig
+}
+
+// Complete fills in any fields not set that are required to have valid data. It's mutating the receiver.
+func (cfg *Config) Complete() CompletedConfig {
+	c := completedConfig{
+		cfg.GenericConfig.Complete(),
+		cfg.GenericConfig.ClientConfig,
+	}
+
+	c.GenericConfig.Version = &version.Info{
+		Major: "1",
+		Minor: "0",
+	}
+
+	return CompletedConfig{&c}
+}
+
+func (config completedConfig) New() (*ClusterPediaServer, error) {
+	if config.ClientConfig == nil {
+		return nil, fmt.Errorf("CompletedConfig.New() called with config.ClientConfig == nil")
+	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(config.ClientConfig)
+	if err != nil {
+		return nil, err
+	}
+	initialAPIGroupResources, err := restmapper.GetAPIGroupResources(discoveryClient)
+	if err != nil {
+		return nil, err
+	}
+
+	kubernetesClient, err := kubernetes.NewForConfig(config.ClientConfig)
+	if err != nil {
+		return nil, err
+	}
+	aggregationClient, err := versioned.NewForConfig(config.ClientConfig)
+	if err != nil {
+		return nil, err
+	}
+	informerFactory := informers.NewInformerFactories(kubernetesClient, aggregationClient)
+
+	resourceServerConfig := kubeapiserver.NewDefaultConfig()
+	resourceServerConfig.GenericConfig.ExternalAddress = config.GenericConfig.ExternalAddress
+	resourceServerConfig.GenericConfig.LoopbackClientConfig = config.GenericConfig.LoopbackClientConfig
+	resourceServerConfig.ExtraConfig = kubeapiserver.ExtraConfig{
+		InitialAPIGroupResources: initialAPIGroupResources,
+		InformerFactory:          informerFactory,
+	}
+	kubeResourceAPIServer, err := resourceServerConfig.Complete().New(genericapiserver.NewEmptyDelegate())
+	if err != nil {
+		return nil, err
+	}
+
+	handlerChainFunc := config.GenericConfig.BuildHandlerChainFunc
+	config.GenericConfig.BuildHandlerChainFunc = func(apiHandler http.Handler, c *genericapiserver.Config) http.Handler {
+		handler := handlerChainFunc(apiHandler, c)
+		handler = filters.WithRequestQuery(handler)
+		handler = filters.WithAcceptHeader(handler)
+		return handler
+	}
+
+	genericServer, err := config.GenericConfig.New("clusterpedia", hooksDelegate{kubeResourceAPIServer})
+	if err != nil {
+		return nil, err
+	}
+
+	v1beta1storage := map[string]rest.Storage{}
+	v1beta1storage["resources"] = resources.NewREST(kubeResourceAPIServer.Handler.NonGoRestfulMux)
+
+	apiGroupInfo := genericapiserver.NewDefaultAPIGroupInfo(internal.GroupName, Scheme, ParameterCodec, Codecs)
+	apiGroupInfo.VersionedResourcesStorageMap["v1beta1"] = v1beta1storage
+	if err := genericServer.InstallAPIGroup(&apiGroupInfo); err != nil {
+		return nil, err
+	}
+
+	genericServer.AddPostStartHookOrDie("start-clusterpedia-informers", func(context genericapiserver.PostStartHookContext) error {
+		return waitForResourceSync(context.StopCh, informerFactory, kubernetesClient)
 	})
 
-	s.installKubeAggregationAPIs(stopCh)
+	return &ClusterPediaServer{
+		GenericAPIServer: genericServer,
+	}, nil
+}
 
-	for _, ws := range s.container.RegisteredWebServices() {
-		klog.V(2).Infof("%s", ws.RootPath())
-	}
+func (server *ClusterPediaServer) Run(ctx context.Context) error {
+	return server.GenericAPIServer.PrepareRun().Run(ctx.Done())
+}
 
-	s.Server.Handler = s.container
+type hooksDelegate struct {
+	genericapiserver.DelegationTarget
+}
 
-	s.buildHandlerChain(stopCh)
-
+func (s hooksDelegate) UnprotectedHandler() http.Handler {
 	return nil
 }
 
-// Installation happens before all informers start to cache objects, so
-//   any attempt to list objects using listers will get empty results.
-func (s *APIServer) installKubeAggregationAPIs(stopCh <-chan struct{}) {
-	urlruntime.Must(resourcev1alpha3.AddToContainer(s.container, s.InformerFactory, s.RuntimeCache))
-
-	urlruntime.Must(version.AddToContainer(s.container, s.KubernetesClient.Kubernetes().Discovery()))
+func (s hooksDelegate) HealthzChecks() []healthz.HealthChecker {
+	return []healthz.HealthChecker{}
 }
 
-func (s *APIServer) Run(ctx context.Context) (err error) {
-	err = s.waitForResourceSync(ctx)
-	if err != nil {
-		return err
-	}
-
-	shutdownCtx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	go func() {
-		<-ctx.Done()
-		_ = s.Server.Shutdown(shutdownCtx)
-	}()
-
-	klog.V(0).Infof("Start listening on %s", s.Server.Addr)
-	if s.Server.TLSConfig != nil {
-		err = s.Server.ListenAndServeTLS("", "")
-	} else {
-		err = s.Server.ListenAndServe()
-	}
-
-	return err
+func (s hooksDelegate) ListedPaths() []string {
+	return []string{}
 }
 
-func (s *APIServer) buildHandlerChain(stopCh <-chan struct{}) {
-	requestInfoResolver := &request.RequestInfoFactory{
-		APIPrefixes:          sets.NewString("api", "apis", "kapis", "kapi"),
-		GrouplessAPIPrefixes: sets.NewString("api", "kapi"),
-		GlobalResources: []schema.GroupResource{
-			clusterv1alpha1.Resource(clusterv1alpha1.ResourcesPluralCluster),
-			resourcev1alpha3.Resource(clusterv1alpha1.ResourcesPluralCluster),
-		},
-	}
-
-	handler := s.Server.Handler
-	handler = filters.WithKubeAPIServer(handler, s.KubernetesClient.Config(), &errorResponder{})
-
-	var authorizers authorizer.Authorizer
-
-	switch s.Config.AuthorizationOptions.Mode {
-	case authorization.AlwaysAllow:
-		authorizers = authorizerfactory.NewAlwaysAllowAuthorizer()
-	case authorization.AlwaysDeny:
-		authorizers = authorizerfactory.NewAlwaysDenyAuthorizer()
-	default:
-	}
-
-	handler = filters.WithAuthorization(handler, authorizers)
-	if s.Config.MultiClusterOptions.Enable {
-		clusterDispatcher := dispatch.NewClusterDispatch(s.ClusterClient)
-		handler = filters.WithMultipleClusterDispatcher(handler, clusterDispatcher)
-	}
-
-	// authenticators are unordered
-	authn := unionauth.New(anonymous.NewAuthenticator(),
-		basictoken.New(basic.NewBasicAuthenticator(auth.NewPasswordAuthenticator(
-			s.KubernetesClient.KubeAggregation(),
-			s.Config.AuthenticationOptions))))
-	handler = filters.WithAuthentication(handler, authn)
-	handler = filters.WithRequestInfo(handler, requestInfoResolver)
-
-	s.Server.Handler = handler
-}
-
-func isResourceExists(apiResources []v1.APIResource, resource schema.GroupVersionResource) bool {
-	for _, apiResource := range apiResources {
-		if apiResource.Name == resource.Resource {
-			return true
-		}
-	}
-	return false
-}
-
-type informerForResourceFunc func(resource schema.GroupVersionResource) (interface{}, error)
-
-func waitForCacheSync(discoveryClient discovery.DiscoveryInterface, sharedInformerFactory informers.GenericInformerFactory, informerForResourceFunc informerForResourceFunc, GVRs map[schema.GroupVersion][]string, stopCh <-chan struct{}) error {
-	for groupVersion, resourceNames := range GVRs {
-		var apiResourceList *v1.APIResourceList
-		var err error
-		err = retry.OnError(retry.DefaultRetry, func(err error) bool {
-			return !errors.IsNotFound(err)
-		}, func() error {
-			apiResourceList, err = discoveryClient.ServerResourcesForGroupVersion(groupVersion.String())
-			return err
-		})
-		if err != nil {
-			return fmt.Errorf("failed to fetch group version resources %s: %s", groupVersion, err)
-		}
-		for _, resourceName := range resourceNames {
-			groupVersionResource := groupVersion.WithResource(resourceName)
-			if !isResourceExists(apiResourceList.APIResources, groupVersionResource) {
-				klog.Warningf("resource %s not exists in the cluster", groupVersionResource)
-			} else {
-				// reflect.ValueOf(sharedInformerFactory).MethodByName("ForResource").Call([]reflect.Value{reflect.ValueOf(groupVersionResource)})
-				if _, err = informerForResourceFunc(groupVersionResource); err != nil {
-					return fmt.Errorf("failed to create informer for %s: %s", groupVersionResource, err)
-				}
-			}
-		}
-	}
-	sharedInformerFactory.Start(stopCh)
-	sharedInformerFactory.WaitForCacheSync(stopCh)
+func (s hooksDelegate) NextDelegate() genericapiserver.DelegationTarget {
 	return nil
 }
 
-func (s *APIServer) waitForResourceSync(ctx context.Context) error {
+func waitForResourceSync(stopCh <-chan struct{}, informerFactory informers.InformerFactory, kubernetesClient *kubernetes.Clientset) error {
 	klog.V(0).Info("Start cache objects")
 
-	stopCh := ctx.Done()
 	// resources we have to create informer first
 	k8sGVRs := map[schema.GroupVersion][]string{
 		{Group: "", Version: "v1"}: {
@@ -266,79 +229,57 @@ func (s *APIServer) waitForResourceSync(ctx context.Context) error {
 		},
 	}
 
-	if err := waitForCacheSync(s.KubernetesClient.Kubernetes().Discovery(),
-		s.InformerFactory.KubernetesSharedInformerFactory(),
+	if err := waitForCacheSync(kubernetesClient.Discovery(),
+		informerFactory.KubernetesSharedInformerFactory(),
 		func(resource schema.GroupVersionResource) (interface{}, error) {
-			return s.InformerFactory.KubernetesSharedInformerFactory().ForResource(resource)
+			return informerFactory.KubernetesSharedInformerFactory().ForResource(resource)
 		},
 		k8sGVRs, stopCh); err != nil {
 		return err
 	}
-
-	ksGVRs := map[schema.GroupVersion][]string{}
-
-	if err := waitForCacheSync(s.KubernetesClient.Kubernetes().Discovery(),
-		s.InformerFactory.KubeSphereSharedInformerFactory(),
-		func(resource schema.GroupVersionResource) (interface{}, error) {
-			return s.InformerFactory.KubeSphereSharedInformerFactory().ForResource(resource)
-		},
-		ksGVRs, stopCh); err != nil {
-		return err
-	}
-
-	go s.RuntimeCache.Start(ctx)
-	s.RuntimeCache.WaitForCacheSync(ctx)
 
 	klog.V(0).Info("Finished caching objects")
 	return nil
 
 }
 
-func logStackOnRecover(panicReason interface{}, w http.ResponseWriter) {
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("recover from panic situation: - %v\r\n", panicReason))
-	for i := 2; ; i += 1 {
-		_, file, line, ok := rt.Caller(i)
-		if !ok {
-			break
+func waitForCacheSync(discoveryClient discovery.DiscoveryInterface, sharedInformerFactory informers.GenericInformerFactory, informerForResourceFunc informerForResourceFunc, GVRs map[schema.GroupVersion][]string, stopCh <-chan struct{}) error {
+	for groupVersion, resourceNames := range GVRs {
+		var apiResourceList *metav1.APIResourceList
+		var err error
+		err = retry.OnError(retry.DefaultRetry, func(err error) bool {
+			return !errors.IsNotFound(err)
+		}, func() error {
+			apiResourceList, err = discoveryClient.ServerResourcesForGroupVersion(groupVersion.String())
+			return err
+		})
+		if err != nil {
+			return fmt.Errorf("failed to fetch group version resources %s: %s", groupVersion, err)
 		}
-		buffer.WriteString(fmt.Sprintf("    %s:%d\r\n", file, line))
+		for _, resourceName := range resourceNames {
+			groupVersionResource := groupVersion.WithResource(resourceName)
+			if !isResourceExists(apiResourceList.APIResources, groupVersionResource) {
+				klog.Warningf("resource %s not exists in the cluster", groupVersionResource)
+			} else {
+				// reflect.ValueOf(sharedInformerFactory).MethodByName("ForResource").Call([]reflect.Value{reflect.ValueOf(groupVersionResource)})
+				if _, err = informerForResourceFunc(groupVersionResource); err != nil {
+					return fmt.Errorf("failed to create informer for %s: %s", groupVersionResource, err)
+				}
+			}
+		}
 	}
-	klog.Errorln(buffer.String())
-
-	headers := http.Header{}
-	if ct := w.Header().Get("Content-Type"); len(ct) > 0 {
-		headers.Set("Accept", ct)
-	}
-
-	w.WriteHeader(http.StatusInternalServerError)
-	w.Write([]byte("Internal server error"))
+	sharedInformerFactory.Start(stopCh)
+	sharedInformerFactory.WaitForCacheSync(stopCh)
+	return nil
 }
 
-func logRequestAndResponse(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-	start := time.Now()
-	chain.ProcessFilter(req, resp)
-
-	// Always log error response
-	logWithVerbose := klog.V(4)
-	if resp.StatusCode() > http.StatusBadRequest {
-		logWithVerbose = klog.V(0)
+func isResourceExists(apiResources []metav1.APIResource, resource schema.GroupVersionResource) bool {
+	for _, apiResource := range apiResources {
+		if apiResource.Name == resource.Resource {
+			return true
+		}
 	}
-
-	logWithVerbose.Infof("%s - \"%s %s %s\" %d %d %dms",
-		iputil.RemoteIp(req.Request),
-		req.Request.Method,
-		req.Request.URL,
-		req.Request.Proto,
-		resp.StatusCode(),
-		resp.ContentLength(),
-		time.Since(start)/time.Millisecond,
-	)
+	return false
 }
 
-type errorResponder struct{}
-
-func (e *errorResponder) Error(w http.ResponseWriter, req *http.Request, err error) {
-	klog.Error(err)
-	responsewriters.InternalError(w, req, err)
-}
+type informerForResourceFunc func(resource schema.GroupVersionResource) (interface{}, error)

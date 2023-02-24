@@ -22,13 +22,13 @@ import (
 	snapshotinformer "github.com/kubernetes-csi/external-snapshotter/client/v4/informers/externalversions"
 	"k8s.io/client-go/informers"
 
-	"kube-aggregation/pkg/models/resources/v1alpha2"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2"
 
 	"sort"
 	"strings"
 
-	"kube-aggregation/pkg/server/params"
-	"kube-aggregation/pkg/utils/sliceutil"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
+	"github.com/clusterpedia-io/clusterpedia/pkg/utils/sliceutil"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"

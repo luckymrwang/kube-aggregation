@@ -13,8 +13,8 @@ import (
 	snapshotefakeclient "github.com/kubernetes-csi/external-snapshotter/client/v4/clientset/versioned/fake"
 	snapshotinformers "github.com/kubernetes-csi/external-snapshotter/client/v4/informers/externalversions"
 
-	"kube-aggregation/pkg/models/resources/v1alpha2"
-	"kube-aggregation/pkg/server/params"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2"
 )
 
 var (

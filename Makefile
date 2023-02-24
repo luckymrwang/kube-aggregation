@@ -1,90 +1,275 @@
-# Copyright 2018 The KubeAggregation Authors. All rights reserved.
-# Use of this source code is governed by a Apache license
-# that can be found in the LICENSE file.
+ON_PLUGINS ?= true
+REGISTRY ?= "ghcr.io/clusterpedia-io/clusterpedia"
 
+GOOS ?= $(shell go env GOOS)
+GOARCH ?= $(shell go env GOARCH)
+RELEASE_ARCHS ?= amd64 arm64
 
-# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true"
-
-GV="cluster:v1alpha1"
-MANIFESTS="cluster/*"
-
-# App Version
-APP_VERSION = v1.0.0
-
-# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
-ifeq (,$(shell go env GOBIN))
-GOBIN=$(shell go env GOPATH)/bin
-else
-GOBIN=$(shell go env GOBIN)
+VERSION ?= $(shell git tag --points-at HEAD --sort -version:refname "v*" | head -1)
+ifeq ($(VERSION),)
+	VERSION="latest"
 endif
 
-OUTPUT_DIR=bin
-ifeq (${GOFLAGS},)
-	# go build with vendor by default.
-	export GOFLAGS=-mod=vendor
+BUILDER_IMAGE_TAG = $(shell git rev-parse HEAD)
+GIT_DIFF = $(shell git diff --quiet >/dev/null 2>&1; if [ $$? -eq 1 ]; then echo "1"; fi)
+ifeq ($(GIT_DIFF), 1)
+	BUILDER_IMAGE_TAG := $(BUILDER_IMAGE_TAG)-dirty
 endif
-define ALL_HELP_INFO
-# Build code.
-#
-# Args:
-#   WHAT: Directory names to build.  If any of these directories has a 'main'
-#     package, the build will produce executable files under $(OUT_DIR).
-#     If not specified, "everything" will be built.
-#   GOFLAGS: Extra flags to pass to 'go' when building.
-#   GOLDFLAGS: Extra linking flags passed to 'go' when building.
-#   GOGCFLAGS: Additional go compile flags passed to 'go' when building.
-#
-# Example:
-#   make
-#   make all
-#   make all WHAT=cmd/ks-apiserver
-#     Note: Use the -N -l options to disable compiler optimizations an inlining.
-#           Using these build options allows you to subsequently use source
-#           debugging tools like delve.
-endef
-.PHONY: all
-all: test ks-apiserver;$(info $(M)...Begin to test and build all of binary.) @ ## Test and build all of binary.
 
-help:
-	@grep -hE '^[ a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-17s\033[0m %s\n", $$1, $$2}'
+HOSTARCH = $(shell go env GOHOSTARCH)
 
-.PHONY: binary
-# Build all of binary
-binary: | ks-apiserver; $(info $(M)...Build all of binary.) @ ## Build all of binary.
+all: apiserver binding-apiserver clustersynchro-manager controller-manager
 
-# Build ks-apiserver binary
-ks-apiserver: ; $(info $(M)...Begin to build ks-apiserver binary.)  @ ## Build ks-apiserver.
-	 hack/gobuild.sh cmd/ks-apiserver;
+gen-clusterconfigs:
+	./hack/gen-clusterconfigs.sh
 
-# Generate manifests e.g. CRD, RBAC etc.
-manifests: ;$(info $(M)...Begin to generate manifests e.g. CRD, RBAC etc..)  @ ## Generate manifests e.g. CRD, RBAC etc.
-	hack/generate_manifests.sh ${CRD_OPTIONS} ${MANIFESTS}
+clean-clusterconfigs:
+	./hack/clean-clusterconfigs.sh
 
-deploy: manifests ;$(info $(M)...Begin to deploy.)  @ ## Deploy.
-	kubectl apply -f config/crds
-	kustomize build config/default | kubectl apply -f -
+.PHONY: crds
+crds:
+	./hack/update-crds.sh
 
-deepcopy: ;$(info $(M)...Begin to deepcopy.)  @ ## Deepcopy.
-	hack/generate_group.sh "deepcopy" kubesphere.io/api kubesphere.io/api ${GV} --output-base=staging/src/  -h "hack/boilerplate.go.txt"
+.PHONY: codegen
+codegen:
+	./hack/update-codegen.sh
 
-container: ;$(info $(M)...Begin to build the docker image.)  @ ## Build the docker image.
-	DRY_RUN=true hack/docker_build.sh
+.PHONY: vendor
+vendor:
+	./hack/update-vendor.sh
 
-container-push: ;$(info $(M)...Begin to build and push.)  @ ## Build and Push.
-	hack/docker_build.sh
+.PHONY: lint
+lint: golangci-lint
+	$(GOLANGLINT_BIN) run
 
-container-cross: ; $(info $(M)...Begin to build container images for multiple platforms.)  @ ## Build container images for multiple platforms. Currently, only linux/amd64,linux/arm64 are supported.
-	DRY_RUN=true hack/docker_build_multiarch.sh
+.PHONY: lint-fix
+lint-fix: golangci-lint
+	$(GOLANGLINT_BIN) run --fix
 
-container-cross-push: ; $(info $(M)...Begin to build and push.)  @ ## Build and Push.
-	hack/docker_build_multiarch.sh
+.PHONY: test
+test:
+	go test -race -cover -v ./pkg/...
 
 .PHONY: clean
-clean: ;$(info $(M)...Begin to clean.)  @ ## Clean.
-	-make -C ./pkg/version clean
-	@echo "ok"
+clean: clean-images
+	rm -rf bin
 
-clientset:  ;$(info $(M)...Begin to find or download controller-gen.)  @ ## Find or download controller-gen,download controller-gen if necessary.
-	./hack/generate_client.sh ${GV}
+.PHONY: apiserver
+apiserver:
+ifeq ($(ON_PLUGINS), true)
+	hack/builder.sh $@
+else
+	hack/builder-nocgo.sh $@
+endif
+
+.PHONY: binding-apiserver
+binding-apiserver:
+ifeq ($(ON_PLUGINS), true)
+	hack/builder.sh $@
+else
+	hack/builder-nocgo.sh $@
+endif
+
+.PHONY: clustersynchro-manager
+clustersynchro-manager:
+ifeq ($(ON_PLUGINS), true)
+	hack/builder.sh $@
+else
+	hack/builder-nocgo.sh $@
+endif
+
+.PHONY: controller-manager
+controller-manager:
+	hack/builder-nocgo.sh $@
+
+.PHONY: images
+images: image-builder image-apiserver image-binding-apiserver image-clustersynchro-manager image-controller-manager
+
+image-builder:
+	docker buildx build \
+		-t $(REGISTRY)/builder-$(GOARCH):$(BUILDER_IMAGE_TAG) \
+		--platform=linux/$(GOARCH) \
+		--load \
+		-f builder.dockerfile . ; \
+
+build-image-%:
+	GOARCH=$(HOSTARCH) $(MAKE) image-builder
+	$(MAKE) $(subst build-,,$@)
+
+image-apiserver:
+	docker buildx build \
+		-t $(REGISTRY)/apiserver-$(GOARCH):$(VERSION) \
+		--platform=linux/$(GOARCH) \
+		--load \
+		--build-arg BUILDER_IMAGE=$(REGISTRY)/builder-$(HOSTARCH):$(BUILDER_IMAGE_TAG) \
+		--build-arg BIN_NAME=apiserver .
+
+image-binding-apiserver:
+	docker buildx build \
+		-t $(REGISTRY)/binding-apiserver-$(GOARCH):$(VERSION) \
+		--platform=linux/$(GOARCH) \
+		--load \
+		--build-arg BUILDER_IMAGE=$(REGISTRY)/builder-$(HOSTARCH):$(BUILDER_IMAGE_TAG) \
+		--build-arg BIN_NAME=binding-apiserver .
+
+image-clustersynchro-manager:
+	docker buildx build \
+		-t $(REGISTRY)/clustersynchro-manager-$(GOARCH):$(VERSION) \
+		--platform=linux/$(GOARCH) \
+		--load \
+		--build-arg BUILDER_IMAGE=$(REGISTRY)/builder-$(HOSTARCH):$(BUILDER_IMAGE_TAG) \
+		--build-arg BIN_NAME=clustersynchro-manager .
+
+image-controller-manager:
+	docker buildx build \
+		-t $(REGISTRY)/controller-manager-$(GOARCH):$(VERSION) \
+		--platform=linux/$(GOARCH) \
+		--load \
+		--build-arg BUILDER_IMAGE=$(REGISTRY)/builder-$(HOSTARCH):$(BUILDER_IMAGE_TAG) \
+		--build-arg BIN_NAME=controller-manager .
+
+.PHONY: push-images
+push-images: push-apiserver-image push-binding-apiserver-image push-clustersynchro-manager-image push-controller-manager-image
+
+# clean manifest https://github.com/docker/cli/issues/954#issuecomment-586722447
+push-builder-image: clean-builder-manifest
+	set -e; \
+	images=""; \
+	for arch in $(RELEASE_ARCHS); do \
+		GOARCH=$$arch $(MAKE) image-builder; \
+		image=$(REGISTRY)/builder-$$arch:$(BUILDER_IMAGE_TAG); \
+		docker push $$image; \
+		images="$$images $$image"; \
+		if [ $(VERSION) != latest ]; then \
+			tag_image=$(REGISTRY)/builder-$$arch:$(VERSION); \
+			docker tag $$image $$tag_image; \
+			docker push $$tag_image; \
+		fi; \
+	done; \
+	docker manifest create $(REGISTRY)/builder:$(BUILDER_IMAGE_TAG) $$images; \
+	docker manifest push $(REGISTRY)/builder:$(BUILDER_IMAGE_TAG); \
+	if [ $(VERSION) != latest ]; then \
+		docker manifest create $(REGISTRY)/builder:$(VERSION) $$images; \
+		docker manifest push $(REGISTRY)/builder:$(VERSION); \
+	fi;
+
+# clean manifest https://github.com/docker/cli/issues/954#issuecomment-586722447
+push-apiserver-image: clean-apiserver-manifest push-builder-image
+	set -e; \
+	images=""; \
+	for arch in $(RELEASE_ARCHS); do \
+		GOARCH=$$arch $(MAKE) image-apiserver; \
+		image=$(REGISTRY)/apiserver-$$arch:$(VERSION); \
+		docker push $$image; \
+		images="$$images $$image"; \
+		if [ $(VERSION) != latest ]; then \
+			latest_image=$(REGISTRY)/apiserver-$$arch:latest; \
+			docker tag $$image $$latest_image; \
+			docker push $$latest_image; \
+		fi; \
+	done; \
+	docker manifest create $(REGISTRY)/apiserver:$(VERSION) $$images; \
+	docker manifest push $(REGISTRY)/apiserver:$(VERSION); \
+	if [ $(VERSION) != latest ]; then \
+		docker manifest create $(REGISTRY)/apiserver:latest $$images; \
+		docker manifest push $(REGISTRY)/apiserver:latest; \
+	fi;
+
+# clean manifest https://github.com/docker/cli/issues/954#issuecomment-586722447
+push-binding-apiserver-image: clean-binding-apiserver-manifest push-builder-image
+	set -e; \
+	images=""; \
+	for arch in $(RELEASE_ARCHS); do \
+		GOARCH=$$arch $(MAKE) image-binding-apiserver; \
+		image=$(REGISTRY)/binding-apiserver-$$arch:$(VERSION); \
+		docker push $$image; \
+		images="$$images $$image"; \
+		if [ $(VERSION) != latest ]; then \
+			latest_image=$(REGISTRY)/binding-apiserver-$$arch:latest; \
+			docker tag $$image $$latest_image; \
+			docker push $$latest_image; \
+		fi; \
+	done; \
+	docker manifest create $(REGISTRY)/binding-apiserver:$(VERSION) $$images; \
+	docker manifest push $(REGISTRY)/binding-apiserver:$(VERSION); \
+	if [ $(VERSION) != latest ]; then \
+		docker manifest create $(REGISTRY)/binding-apiserver:latest $$images; \
+		docker manifest push $(REGISTRY)/binding-apiserver:latest; \
+	fi;
+
+# clean manifest https://github.com/docker/cli/issues/954#issuecomment-586722447
+push-clustersynchro-manager-image: clean-clustersynchro-manager-manifest push-builder-image
+	set -e; \
+	images=""; \
+	for arch in $(RELEASE_ARCHS); do \
+		GOARCH=$$arch $(MAKE) image-clustersynchro-manager; \
+		image=$(REGISTRY)/clustersynchro-manager-$$arch:$(VERSION); \
+		docker push $$image; \
+		images="$$images $$image"; \
+		if [ $(VERSION) != latest ]; then \
+			latest_image=$(REGISTRY)/clustersynchro-manager-$$arch:latest; \
+			docker tag $$image $$latest_image; \
+			docker push $$latest_image; \
+		fi; \
+	done; \
+	docker manifest create $(REGISTRY)/clustersynchro-manager:$(VERSION) $$images; \
+	docker manifest push $(REGISTRY)/clustersynchro-manager:$(VERSION); \
+	if [ $(VERSION) != latest ]; then \
+		docker manifest create $(REGISTRY)/clustersynchro-manager:latest $$images; \
+		docker manifest push $(REGISTRY)/clustersynchro-manager:latest; \
+	fi;
+
+# clean manifest https://github.com/docker/cli/issues/954#issuecomment-586722447
+push-controller-manager-image: clean-controller-manager-manifest push-builder-image
+	set -e; \
+	images=""; \
+	for arch in $(RELEASE_ARCHS); do \
+		GOARCH=$$arch $(MAKE) image-controller-manager; \
+		image=$(REGISTRY)/controller-manager-$$arch:$(VERSION); \
+		docker push $$image; \
+		images="$$images $$image"; \
+		if [ $(VERSION) != latest ]; then \
+			latest_image=$(REGISTRY)/controller-manager-$$arch:latest; \
+			docker tag $$image $$latest_image; \
+			docker push $$latest_image; \
+		fi; \
+	done; \
+	docker manifest create $(REGISTRY)/controller-manager:$(VERSION) $$images; \
+	docker manifest push $(REGISTRY)/controller-manager:$(VERSION); \
+	if [ $(VERSION) != latest ]; then \
+		docker manifest create $(REGISTRY)/controller-manager:latest $$images; \
+		docker manifest push $(REGISTRY)/controller-manager:latest; \
+	fi;
+
+clean-images: clean-apiserver-manifest clean-clustersynchro-manager-manifest
+	docker images|grep $(REGISTRY)/apiserver|awk '{print $$3}'|xargs docker rmi --force
+	docker images|grep $(REGISTRY)/clustersynchro-manager|awk '{print $$3}'|xargs docker rmi --force
+
+clean-builder-manifest:
+	docker manifest rm $(REGISTRY)/builder:$(BUILDER_IMAGE_TAG) 2>/dev/null;\
+	docker manifest rm $(REGISTRY)/builder:$(VERSION) 2>/dev/null; exit 0
+
+clean-apiserver-manifest:
+	docker manifest rm $(REGISTRY)/apiserver:$(VERSION) 2>/dev/null;\
+	docker manifest rm $(REGISTRY)/apiserver:latest 2>/dev/null; exit 0
+
+clean-binding-apiserver-manifest:
+	docker manifest rm $(REGISTRY)/binding-apiserver:$(VERSION) 2>/dev/null;\
+	docker manifest rm $(REGISTRY)/binding-apiserver:latest 2>/dev/null; exit 0
+
+clean-clustersynchro-manager-manifest:
+	docker manifest rm $(REGISTRY)/clustersynchro-manager:$(VERSION) 2>/dev/null;\
+	docker manifest rm $(REGISTRY)/clustersynchro-manager:latest 2>/dev/null; exit 0
+
+clean-controller-manager-manifest:
+	docker manifest rm $(REGISTRY)/controller-manager:$(VERSION) 2>/dev/null;\
+	docker manifest rm $(REGISTRY)/controller-manager:latest 2>/dev/null; exit 0
+
+.PHONY: golangci-lint
+golangci-lint:
+ifeq (, $(shell which golangci-lint))
+	GO111MODULE=on go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.49.0
+GOLANGLINT_BIN=$(shell go env GOPATH)/bin/golangci-lint
+else
+GOLANGLINT_BIN=$(shell which golangci-lint)
+endif

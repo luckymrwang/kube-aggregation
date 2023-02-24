@@ -19,22 +19,17 @@ package informers
 import (
 	"time"
 
-	snapshotinformer "github.com/kubernetes-csi/external-snapshotter/client/v4/informers/externalversions"
-	prominformers "github.com/prometheus-operator/prometheus-operator/pkg/client/informers/externalversions"
-	promfake "github.com/prometheus-operator/prometheus-operator/pkg/client/versioned/fake"
-	istioinformers "istio.io/client-go/pkg/informers/externalversions"
 	apiextensionsinformers "k8s.io/apiextensions-apiserver/pkg/client/informers/externalversions"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
 
-	ksfake "kube-aggregation/pkg/client/clientset/versioned/fake"
-	ksinformers "kube-aggregation/pkg/client/informers/externalversions"
+	ksfake "github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned/fake"
+	ksinformers "github.com/clusterpedia-io/clusterpedia/pkg/client/informers/externalversions"
 )
 
 type nullInformerFactory struct {
 	fakeK8sInformerFactory informers.SharedInformerFactory
 	fakeKsInformerFactory  ksinformers.SharedInformerFactory
-	fakePrometheusFactory  prominformers.SharedInformerFactory
 }
 
 func NewNullInformerFactory() InformerFactory {
@@ -44,13 +39,9 @@ func NewNullInformerFactory() InformerFactory {
 	fakeKsClient := ksfake.NewSimpleClientset()
 	fakeKsInformerFactory := ksinformers.NewSharedInformerFactory(fakeKsClient, time.Minute*10)
 
-	fakePrometheusClient := promfake.NewSimpleClientset()
-	fakePrometheusFactory := prominformers.NewSharedInformerFactory(fakePrometheusClient, time.Minute*10)
-
 	return &nullInformerFactory{
 		fakeK8sInformerFactory: fakeInformerFactory,
 		fakeKsInformerFactory:  fakeKsInformerFactory,
-		fakePrometheusFactory:  fakePrometheusFactory,
 	}
 }
 
@@ -62,20 +53,8 @@ func (n nullInformerFactory) KubeSphereSharedInformerFactory() ksinformers.Share
 	return n.fakeKsInformerFactory
 }
 
-func (n nullInformerFactory) IstioSharedInformerFactory() istioinformers.SharedInformerFactory {
-	return nil
-}
-
-func (n nullInformerFactory) SnapshotSharedInformerFactory() snapshotinformer.SharedInformerFactory {
-	return nil
-}
-
 func (n nullInformerFactory) ApiExtensionSharedInformerFactory() apiextensionsinformers.SharedInformerFactory {
 	return nil
-}
-
-func (n *nullInformerFactory) PrometheusSharedInformerFactory() prominformers.SharedInformerFactory {
-	return n.fakePrometheusFactory
 }
 
 func (n nullInformerFactory) Start(stopCh <-chan struct{}) {

@@ -19,15 +19,15 @@ package v1alpha3
 import (
 	"strings"
 
-	"github.com/emicklei/go-restful"
+	"github.com/emicklei/go-restful/v3"
 	"k8s.io/klog"
 
-	"kube-aggregation/pkg/api"
-	"kube-aggregation/pkg/apiserver/query"
-	"kube-aggregation/pkg/models/resources/v1alpha2"
-	resourcev1alpha2 "kube-aggregation/pkg/models/resources/v1alpha2/resource"
-	resourcev1alpha3 "kube-aggregation/pkg/models/resources/v1alpha3/resource"
-	"kube-aggregation/pkg/server/params"
+	"github.com/clusterpedia-io/clusterpedia/pkg/api"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/query"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2"
+	resourcev1alpha2 "github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2/resource"
+	resourcev1alpha3 "github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha3/resource"
 )
 
 type Handler struct {

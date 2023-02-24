@@ -26,8 +26,8 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/informers"
 
-	"kube-aggregation/pkg/models/resources/v1alpha2"
-	"kube-aggregation/pkg/server/params"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2"
 )
 
 type storageClassesSearcher struct {

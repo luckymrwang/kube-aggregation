@@ -20,18 +20,16 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	fakesnapshot "github.com/kubernetes-csi/external-snapshotter/client/v4/clientset/versioned/fake"
-	fakeistio "istio.io/client-go/pkg/clientset/versioned/fake"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakek8s "k8s.io/client-go/kubernetes/fake"
 
-	fakeks "kube-aggregation/pkg/client/clientset/versioned/fake"
-	"kube-aggregation/pkg/informers"
-	"kube-aggregation/pkg/models"
-	"kube-aggregation/pkg/models/resources/v1alpha2"
-	"kube-aggregation/pkg/server/params"
+	"github.com/clusterpedia-io/clusterpedia/pkg/apiserver/params"
+	fakeks "github.com/clusterpedia-io/clusterpedia/pkg/client/clientset/versioned/fake"
+	"github.com/clusterpedia-io/clusterpedia/pkg/informers"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models"
+	"github.com/clusterpedia-io/clusterpedia/pkg/models/resources/v1alpha2"
 )
 
 func TestConditions(t *testing.T) {
@@ -213,9 +211,7 @@ func prepare() (informers.InformerFactory, error) {
 
 	ksClient := fakeks.NewSimpleClientset()
 	k8sClient := fakek8s.NewSimpleClientset()
-	istioClient := fakeistio.NewSimpleClientset()
-	snapshotClient := fakesnapshot.NewSimpleClientset()
-	fakeInformerFactory := informers.NewInformerFactories(k8sClient, ksClient, istioClient, snapshotClient, nil, nil)
+	fakeInformerFactory := informers.NewInformerFactories(k8sClient, ksClient)
 
 	k8sInformerFactory := fakeInformerFactory.KubernetesSharedInformerFactory()
 
