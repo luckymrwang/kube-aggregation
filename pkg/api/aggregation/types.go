@@ -1,4 +1,4 @@
-package clusterpedia
+package aggregation
 
 import (
 	"net/url"
@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/inspur/pkg/api/clusterpedia/fields"
+	"github.com/inspur/pkg/api/aggregation/fields"
 )
 
 type OrderBy struct {

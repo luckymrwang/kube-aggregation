@@ -1,8 +1,8 @@
 package install
 
 import (
-	internal "github.com/inspur/pkg/api/clusterpedia"
-	"github.com/inspur/pkg/api/clusterpedia/v1beta1"
+	internal "github.com/inspur/pkg/api/aggregation"
+	"github.com/inspur/pkg/api/aggregation/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 )

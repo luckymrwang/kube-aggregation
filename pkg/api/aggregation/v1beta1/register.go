@@ -1,7 +1,7 @@
 package v1beta1
 
 import (
-	internal "github.com/inspur/pkg/api/clusterpedia"
+	internal "github.com/inspur/pkg/api/aggregation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
