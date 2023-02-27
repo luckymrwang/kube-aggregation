@@ -25,8 +25,6 @@ func RemoveFieldSelectorFromRequest(handler http.Handler) http.Handler {
 		//
 		// 2. prevent `RequestInfoFactory.NewRequestInfo` verifying `FieldSelector` on DecodeParameters
 		//     https://github.com/kubernetes/kubernetes/blob/f5be5052e3d0808abb904aebd3218fe4a5c2dd82/staging/src/k8s.io/apiserver/pkg/endpoints/request/requestinfo.go#L210-L218
-		//
-		// issue: https://github.com/inspur/issues/54
 		originQuery := req.URL.Query()
 		if originQuery.Get("fieldSelector") != "" {
 			originQuery.Del("fieldSelector")
