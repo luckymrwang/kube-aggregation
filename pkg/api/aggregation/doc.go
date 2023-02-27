@@ -1,3 +1,3 @@
 // +k8s:deepcopy-gen=package
-// +groupName=clusterpedia.io
+// +groupName=icks.io
 package aggregation

@@ -11,9 +11,3 @@ subjects:
   - kind: ServiceAccount
     name: {{ include "clusterpedia.apiserver.fullname" . }}
     namespace: {{ .Release.Namespace }}
-  - kind: ServiceAccount
-    name: {{ include "clusterpedia.clustersynchroManager.fullname" . }}
-    namespace: {{ .Release.Namespace }}
-  - kind: ServiceAccount
-    name: {{ include "clusterpedia.controllerManager.fullname" . }}
-    namespace: {{ .Release.Namespace }}

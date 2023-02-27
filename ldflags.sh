@@ -31,7 +31,6 @@ LDFLAGS+=" -X k8s.io/client-go/pkg/version.buildDate=${BUILD_DATE}"
 
 
 # The `component-base/version` effects the version obtained using Kubernetes OpenAPI.
-#   OpenAPI Path: /apis/clusterpedia.io/v1beta1/resources/version
 #   $ kubectl version
 
 LDFLAGS+=" -X k8s.io/component-base/version.gitVersion=${KUBE_DEPENDENCE_VERSION}"
