@@ -8,6 +8,6 @@ spec:
   groupPriorityMinimum: 1000
   versionPriority: 100
   service:
-    name: clusterpedia-apiserver
-    namespace: clusterpedia
+    name: apiserver
+    namespace: kube-aggregation
   version: v1beta1

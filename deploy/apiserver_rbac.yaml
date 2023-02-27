@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: clusterpedia
+  name: kube-aggregation
 rules:
   - apiGroups: ['*']
     resources: ['*']
@@ -13,12 +13,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: clusterpedia
+  name: apiserver
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: clusterpedia
+  name: apiserver
 subjects:
   - kind: ServiceAccount
-    name: clusterpedia-apiserver
-    namespace: clusterpedia
+    name: apiserver
+    namespace: kube-aggregation
