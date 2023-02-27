@@ -5,11 +5,11 @@ FROM golang:1.19.5
 
 RUN apt-get update && apt-get install -y gcc-aarch64-linux-gnu gcc-x86-64-linux-gnu
 
-COPY . /clusterpedia
+COPY . /kube-aggregation
 
-# RUN rm -rf /clusterpedia/.git
-# RUN rm -rf /clusterpedia/test
+# RUN rm -rf /kube-aggregation/.git
+# RUN rm -rf /kube-aggregation/test
 
-ENV CLUSTERPEDIA_REPO="/clusterpedia"
+ENV CLUSTERPEDIA_REPO="/kube-aggregation"
 
-RUN cp /clusterpedia/hack/builder.sh /
+RUN cp /kube-aggregation/hack/builder.sh /

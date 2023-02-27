@@ -10,4 +10,4 @@ FROM alpine:3.17.1
 RUN apk add --no-cache gcompat
 
 ARG BIN_NAME
-COPY --from=builder /clusterpedia/bin/${BIN_NAME} /usr/local/bin/${BIN_NAME}
+COPY --from=builder /kube-aggregation/bin/${BIN_NAME} /usr/local/bin/${BIN_NAME}
